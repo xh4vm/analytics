@@ -1,0 +1,4 @@
+- pipeline.id: "LOGS-NGINS"
+  pipeline.workers: 4
+  pipeline.batch.size: 250
+  path.config: "./config/pipelines/nginx_pipeline.conf"
