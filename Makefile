@@ -32,7 +32,7 @@ endef
 mongo: run_containers
 
 .PHONY: interactive build mongo cluster
-mongo_cfg: config_cluster create_mongo_db create_collections
+mongo_cfg: config_cluster
 
 .PHONY: run docker containers
 run_containers:
@@ -51,11 +51,35 @@ config_cluster:
 .PHONY: create database
 create_mongo_db:
 	$(call log,Create database)
-	sudo docker exec -it mongors1n1 bash -c 'echo "use movies_db" | mongosh'
-	sudo docker exec -it mongos1 bash -c 'echo "sh.enableShardZing(\"movies_db\")" | mongosh'
+	sudo docker exec -it mongors1n1 bash -c 'echo "use movies" | mongosh'
+	sudo docker exec -it mongos1 bash -c 'echo "sh.enableSharding(\"movies\")" | mongosh'
+
+.PHONY: create and active venv
+build_venv: create-venv
+	$(call log,Create venv)
+	python3 -m venv venv
+	$(call log,Poetry installing packages)
+	poetry install
+	$(call log,Poetry activate
+	poetry shell
+
+.PHONY: create collections without index
+create_coll:
+	python db_research/mongo/src/create_collections.py
 
 .PHONY: create collections
-create_collections:
-	$(call log,Create collections)
-	sudo docker exec -it mongos1 bash -c 'echo "db.createCollection(\"movies_db.likes_collection\")" | mongosh'
-	sudo docker exec -it mongos1 bash -c 'echo "sh.shardCollection(\"movies_db.likes_collection\", {\"film_id\": \"hashed\"})" | mongosh'
+drop_coll:
+	python db_research/mongo/src/create_collections.py -d
+
+.PHONY: create collections with index
+create_coll_i:
+	python db_research/mongo/src/create_collections.py
+	python db_research/mongo/src/create_collections.py -i
+
+.PHONY: create load data
+load_data:
+	python db_research/mongo/src/load_data.py.py
+
+.PHONY: get benchmarks results
+test_data:
+	python db_research/mongo/src/benchmarks.py

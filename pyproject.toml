@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "analytics"
+version = "0.1.0"
+description = ""
+authors = ["Kariyma <mariika-sun@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pymongo = "4.3.3"
+pydantic = {extras = ["dotenv"], version = "1.10.2"}
+backoff = "2.2.1"
+loguru = "0.6.0"
+faker = "^15.3.4"
+argparse = "^1.4.0"
+flake8 = ">=4.0.0"
+pre-commit = ">=2.19.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,108 @@
+{
+  "movies.likes.find_filter(particular document: user_id, film_id)": {
+    "find": "likes",
+    "filter": {
+      "user_id": "2cfd77c6-1c89-4527-b4cf-e1f6324951e4",
+      "film_id": "9ae7eec5-cf28-4da8-9922-bda1856d2097"
+    }
+  },
+  "movies.likes.find_filter(user's likes in a day)": {
+    "find": "likes",
+    "filter": {
+      "rating": { "$gt": 5 },
+      "user_id": "2cfd77c6-1c89-4527-b4cf-e1f6324951e4",
+      "created": { "$gte": "2022-01-01", "$lt": "2022-01-02"}
+    },
+    "sort": { "created": 1 }
+  },
+  "movies.reviews.find_filter(particular reviews: user_id, film_id)": {
+    "find": "reviews",
+    "filter": {
+      "user_id": "2cfd77c6-1c89-4527-b4cf-e1f6324951e4",
+      "film_id": "9ae7eec5-cf28-4da8-9922-bda1856d2097"
+    }
+  },
+  "movies.reviews.find_filter(all film's reviews)": {
+    "find": "reviews",
+    "filter": {
+      "user_id": "2cfd77c6-1c89-4527-b4cf-e1f6324951e4",
+      "created": { "$gte": "2022-01-01"}
+    },
+    "sort": { "created": -1 }
+  },
+  "movies.bookmarks.find_filter(particular bookmark: user_id, film_id)": {
+    "find": "bookmarks",
+    "filter": {
+      "user_id": "2cfd77c6-1c89-4527-b4cf-e1f6324951e4",
+      "film_id": "9ae7eec5-cf28-4da8-9922-bda1856d2097"
+    }
+  },
+  "movies.bookmarks.find_filter(all user's bookmarks)": {
+    "find": "bookmarks",
+    "filter": {
+      "user_id": "2cfd77c6-1c89-4527-b4cf-e1f6324951e4"
+    }
+  },
+  "movies.likes.aggregate(average film's rating)": {
+    "aggregate": "likes",
+    "pipeline": [{
+      "$group": {
+        "_id": null,
+        "avg_val":{"$avg": "$rating"}
+      }
+    }],
+    "cursor": {}
+  },
+  "movies.likes.update(particular document: user_id, film_id set rating)": {
+    "update": "likes",
+    "updates": [
+      {
+        "q": {
+          "user_id": "2cfd77c6-1c89-4527-b4cf-e1f6324951e4",
+          "film_id": "9ae7eec5-cf28-4da8-9922-bda1856d2097"
+        },
+        "u": {
+          "$set": {
+            "rating": 5
+          }
+        }
+      }
+    ]
+  },
+  "movies.likes.count(film's like before insert)": {
+    "count": "likes",
+    "query": {
+      "rating": { "$gt": 5 },
+      "film_id": "99b36c3b-f894-4c39-857d-7b0d26e1e380"
+    }
+  },
+  "movies.likes.insert": {
+    "insert": "likes",
+    "documents": [
+      {
+        "_id": "6395895c5eeffaa93e8b4d89",
+        "user_id": "2cfd77c6-1c89-4527-b4cf-e1f6324951e4",
+        "film_id": "99b36c3b-f894-4c39-857d-7b0d26e1e380",
+        "created": "2021-11-15 17:05:17",
+        "modified": "2022-09-29 21:44:46",
+        "rating": 10
+      }
+    ]
+  },
+  "movies.likes.count(film's like after insert)": {
+    "count": "likes",
+    "query": {
+      "rating": { "$gt": 5 },
+      "film_id": "99b36c3b-f894-4c39-857d-7b0d26e1e380"
+    }
+  },
+  "movies.likes.delete(particular document: _id)": {
+    "delete": "likes",
+    "deletes": [
+      {
+        "q": { "_id": "6395895c5eeffaa93e8b4d89" },
+        "limit" : 1
+      }
+    ]
+  }
+}
