@@ -1,30 +1,37 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 
+from core.config import SETTINGS
 from core.settings import Messages
 from db.mongodb.mongodb import AsyncMongoDB
 from db.redis import AsyncCacheStorage
-from models.like import Like
+from models.base import ResponseMDB
+from models.like import FilmsLikes, Like
 
 
 class BaseSearchService(ABC):
 
     @abstractmethod
-    async def find(self, query: str, **kwargs):
+    async def create_doc(self, params: dict, **kwargs):
         pass
 
     @abstractmethod
-    async def get_list(self, **kwargs):
+    async def update_doc(self, find: dict, update: dict, **kwargs):
         pass
 
     @abstractmethod
-    async def get_details(self, obj_id: str, **kwargs):
+    async def delete_doc(self, params: dict, **kwargs):
+        pass
+
+    @abstractmethod
+    async def get_doc_avg_rating(self, data: dict):
         pass
 
 
 class MongoDBService(BaseSearchService):
     """ Class implements general functionality of data get services. """
 
-    model: Like
+    model: None
     query = None
     errors = []
 
@@ -46,58 +53,49 @@ class MongoDBService(BaseSearchService):
 
         self.errors = []
 
-    async def find(self, query: str, **kwargs) -> Like:
+    async def create_doc(self, params: dict, **kwargs):
+        doc = {**params, 'created': datetime.utcnow(), 'modified': datetime.utcnow()}
+        result = await self.data_source.insert_one(self.model.Config.collection, doc)
+        return self.model.parse_obj({**doc, 'id': str(result.inserted_id)})
 
-        # data = await self.data_source.get_data_by_id(obj_id, kwargs['model'].Config.index)
-        # if not data:
-        #     self.errors.append(self.messages.not_found_doc.format(kwargs['model'].Config.alias, obj_id))
-        #     return None
-        # return kwargs['model'](**data)
-        pass
+    async def update_doc(self, find: dict, update: dict, **kwargs):
 
-    async def get_list(
-            self,
-            params: dict,
-            filters: dict,
-            model,
-            query: str | None = None
-    ) -> list[Like] | None:
-        """ Get list of documents according to parameters.
+        update = {**update, 'modified': datetime.utcnow()}
+        query_update = {'$set': update}
 
-        Arguments:
-            query: query string
-            params: parameters for search set up
-            filters: filters for search
-            model: model of objects in list
+        result = await self.data_source.update_one(self.model.Config.collection, find, query_update)
+        return result if not result else self.model.parse_obj(result)
 
-        Returns:
-            list[Like] | None: list of objects or None if list empty
-        """
+    async def delete_doc(self, params: dict, **kwargs):
 
-        # self.errors = []
-        # self.query = ElasticsearchFieldQuery()
-        #
-        # source = list(model.schema()['properties'].keys())
-        #
-        # search_filters = {key: value for key, value in filters.items() if value}
-        #
-        # if search_filters or query:
-        #
-        #     for filter_key, filter_value in search_filters.items():
-        #         if not await self.filters_methods[filter_key](filter_key, filter_value):
-        #             return None
-        #
-        # if query:
-        #     await self.query.append_query_string(query)
-        #
-        # data = await self.data_source.search(model.Config.index, source, self.query.query, params)
-        #
-        # if not data:
-        #     return None
-        #
-        # return [model(**doc) for doc in data]
-        pass
+        result = await self.data_source.delete_one(self.model.Config.collection, params)
+        return ResponseMDB(result=result)
 
-    @abstractmethod
-    async def get_details(self, obj_id: str, **kwargs):
-        pass
+    async def get_doc_avg_rating(self, data: dict):
+        match = {'$match': data}
+        group = {
+            '$group': {
+                '_id': None,
+                'avg_val': {'$avg': '$rating'}
+            }
+        }
+        result = await self.data_source.aggregate(self.model.Config.collection, match, group)
+        return result[0] if result else None
+
+    async def get_doc_likes(self, field_name: str, field_value: str, model: type(Like) | type(FilmsLikes)):
+        query = {
+            '$and': [
+                {field_name: {'$eq': field_value}},
+                {'rating': None}
+            ]
+        }
+        query['$and'][1]['rating'] = SETTINGS.MONGODB.LIKES
+        number_likes = await self.data_source.count('likes', query)
+
+        query['$and'][1]['rating'] = SETTINGS.MONGODB.DISLIKE
+        number_dislikes = await self.data_source.count('likes', query)
+
+        result = model.parse_obj(
+            {field_name: field_value, 'number_likes': number_likes, 'number_dislikes': number_dislikes}
+        )
+        return result

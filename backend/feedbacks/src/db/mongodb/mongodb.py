@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from pymongo import ReturnDocument
 
 
 class AsyncDBStorage(ABC):
@@ -14,7 +15,7 @@ class AsyncDBStorage(ABC):
         pass
 
     @abstractmethod
-    async def update_one(self, collection: str, data: dict, *args, **kwargs):
+    async def update_one(self, collection: str, find: dict, update: dict, *args, **kwargs):
         pass
 
     @abstractmethod
@@ -48,14 +49,29 @@ class AsyncMongoDB(AsyncDBStorage):
         res = await self.cl[db_name].command(command)
         return res
 
+    async def aggregate(self, collection: str, match: dict, group: dict):
+        cursor = self.db.get_collection(collection).aggregate(pipeline=[match, group])
+        result = []
+
+        async for doc in cursor:
+            result.append(doc)
+
+        return result
+
     async def insert_one(self, collection: str, data: dict,  *args, **kwargs):
         return await self.db.get_collection(collection).insert_one(data)
 
-    async def update_one(self, collection: str, data: dict, *args, **kwargs):
-        pass
+    async def update_one(self, collection: str, find: dict, update: dict, *args, **kwargs):
+        result = await self.db.get_collection(collection).find_one_and_update(
+            find,
+            update,
+            return_document=ReturnDocument.AFTER
+        )
+        return result
 
     async def delete_one(self, collection: str, data: dict, *args, **kwargs):
-        pass
+        result = await self.db.get_collection(collection).delete_one(data)
+        return result.acknowledged
 
     async def find(self, collection: str, query: dict, *args, **kwargs):
         pass

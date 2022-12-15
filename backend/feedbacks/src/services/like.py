@@ -1,13 +1,11 @@
-import datetime
 from functools import lru_cache
 
-from api.v1.params import FilmUserIDsParams
-from core.config import SETTINGS, get_messages
+from core.config import get_messages
 from core.settings import Messages
 from db.mongodb.mongodb import AsyncMongoDB, get_mongodb
 from db.redis import AsyncCacheStorage, get_redis
 from fastapi import Depends
-from models.like import FilmsLikes, Like
+from models.like import FilmsAvgRating, Like
 from services.base import MongoDBService
 
 
@@ -15,35 +13,21 @@ class LikeService(MongoDBService):
 
     model = Like
 
-    async def get_films_likes(self, film_id: str):
-        query = {
-            '$and': [
-                {'film_id': {'$eq': film_id}},
-                {'rating': None}
-            ]
+    async def get_film_avg_rating(self, film_id: str):
+        result = await self.get_doc_avg_rating({'film_id': film_id})
+        return FilmsAvgRating(film_id=film_id, avg_rating=round(result['avg_val'], 2)) if result else None
+
+    async def update_like(self, params: dict, **kwargs):
+        like_find = {
+            'user_id': params.get('user_id'),
+            'film_id': params.get('film_id'),
         }
-        query['$and'][1]['rating'] = SETTINGS.MONGODB.LIKES
-        number_likes = await self.data_source.count('likes', query)
+        like_update = {
+            'rating': params.get('rating'),
+        }
 
-        query['$and'][1]['rating'] = SETTINGS.MONGODB.DISLIKE
-        number_dislikes = await self.data_source.count('likes', query)
-
-        return FilmsLikes(id_film=film_id, number_likes=number_likes, number_dislikes=number_dislikes)
-
-    async def create_like(self, params: FilmUserIDsParams, rating: int, **kwargs):
-        like = Like(
-            user_id=str(params.user_id),
-            film_id=str(params.film_id),
-            rating=rating,
-            created=datetime.datetime.utcnow(),
-            modified=datetime.datetime.utcnow(),
-        )
-        result = await self.data_source.insert_one('likes', like.dict())
-        like.id = str(result.inserted_id)
-        return like
-
-    async def get_details(self, obj_id: str, **kwargs):
-        pass
+        result = await self.update_doc(like_find, like_update)
+        return result if not result else Like.parse_obj(result)
 
 
 @lru_cache()

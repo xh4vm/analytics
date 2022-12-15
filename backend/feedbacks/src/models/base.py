@@ -20,6 +20,10 @@ class BaseMixin(BaseModel):
         cache_free = False
 
 
+class ResponseMDB(BaseModel):
+    result: bool
+
+
 async def get_obj(model, string_value: str | None):
     """ Get object from str.
 
