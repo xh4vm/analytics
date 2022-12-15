@@ -1,0 +1,26 @@
+{
+  "db_data.likes.createIndexes": {
+    "createIndexes": "likes",
+    "indexes": [
+      { "key": { "film_id": 1, "user_id": 1 }, "unique": true, "name": "likes film_id_user_id key" }
+    ]
+  },
+  "db_data.reviews.createIndexes": {
+    "createIndexes": "reviews",
+    "indexes": [
+      { "key": { "film_id": 1, "user_id": 1 }, "unique": true, "name": "reviews film_id_user_id key" }
+    ]
+  },
+  "db_data.reviews_likes.createIndexes": {
+    "createIndexes": "reviews_likes",
+    "indexes": [
+      { "key": { "review_id": 1, "user_id": 1 }, "unique": true, "name": "reviews_likes review_id_user_id key" }
+    ]
+  },
+  "db_data.bookmarks.createIndexes": {
+    "createIndexes": "bookmarks",
+    "indexes": [
+      { "key": { "film_id": 1, "user_id": 1 }, "unique": true, "name": "bookmarks film_id_user_id key" }
+    ]
+  }
+}

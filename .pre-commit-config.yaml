@@ -25,6 +25,6 @@ repos:
         description: Runs hadolint Docker image to lint Dockerfiles
         language: docker_image
         types: ["dockerfile"]
-        args: ["--ignore", "DL3013", "--ignore", "DL3042", "--ignore", "DL3008"]
+        args: ["--ignore", "DL3013", "--ignore", "DL3042", "--ignore", "DL3008", "--ignore", "DL3009", "--ignore", "DL4006"]
 
         

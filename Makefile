@@ -29,12 +29,12 @@ define log
 endef
 
 .PHONY: run mongo containers
-mongo: run_containers
+mongo: create_net run_containers
 
 .PHONY: interactive build mongo cluster
 mongo_cfg: config_cluster
 
-.PHONY: run docker containers
+.PHONY: run docker mongodb containers
 run_containers:
 	$(call log,Run containers)
 	sudo docker-compose --profile mongo up
@@ -83,3 +83,14 @@ load_data:
 .PHONY: get benchmarks results
 test_data:
 	python db_research/mongo/src/benchmarks.py
+
+.PHONY: run feedbacks dev
+run_dev: create_net run_feedbacks_dev
+
+.PHONY: create network feedbacks dev docker containers
+create_net:
+	- sudo docker network create feedbacks_net
+
+.PHONY: run feedbacks dev docker containers
+run_feedbacks_dev:
+	sudo docker-compose --profile feedbacks-dev up

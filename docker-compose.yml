@@ -1,8 +1,21 @@
 version: '3.8'
 
+x-base-service: &base_service
+  networks:
+    - feedbacks_net
+
+x-base-profile-feedback: &base-profile-feedback
+  profiles:
+    - feedbacks
+
+x-base-profile-feedback-dev: &base-profile-feedback-dev
+  profiles:
+    - feedbacks-dev
+
 x-base-profile-mongo: &base-profile-mongo
   profiles:
     - mongo
+  <<: *base_service
 
 services:
   mongors1n1:
@@ -15,7 +28,7 @@ services:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/data1:/data/db
+      - /tmp/mongo_cluster1/data1:/data/db
     <<: *base-profile-mongo
 
   mongors1n2:
@@ -28,7 +41,7 @@ services:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/data2:/data/db
+      - /tmp/mongo_cluster1/data2:/data/db
     <<: *base-profile-mongo
 
   mongors1n3:
@@ -41,7 +54,7 @@ services:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/data3:/data/db
+      - /tmp/mongo_cluster1/data3:/data/db
     <<: *base-profile-mongo
 
   mongors2n1:
@@ -54,7 +67,7 @@ services:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/data4:/data/db
+      - /tmp/mongo_cluster1/data4:/data/db
     <<: *base-profile-mongo
 
   mongors2n2:
@@ -67,7 +80,7 @@ services:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/data5:/data/db
+      - /tmp/mongo_cluster1/data5:/data/db
     <<: *base-profile-mongo
 
   mongors2n3:
@@ -80,7 +93,7 @@ services:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/data6:/data/db
+      - /tmp/mongo_cluster1/data6:/data/db
     <<: *base-profile-mongo
 
   mongocfg1:
@@ -91,7 +104,7 @@ services:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/config1:/data/db
+      - /tmp/mongo_cluster1/config1:/data/db
     <<: *base-profile-mongo
 
   mongocfg2:
@@ -102,7 +115,7 @@ services:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/config2:/data/db
+      - /tmp/mongo_cluster1/config2:/data/db
     <<: *base-profile-mongo
 
   mongocfg3:
@@ -113,7 +126,7 @@ services:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/config3:/data/db
+      - /tmp/mongo_cluster1/config3:/data/db
     <<: *base-profile-mongo
 
   mongos1:
@@ -149,3 +162,28 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
     <<: *base-profile-mongo
+
+  redis:
+    <<: *base_service
+    image: redis:7.0-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - ${REDIS_PORT}:6379
+    healthcheck:
+      test: [ "CMD", "redis-cli","ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    profiles:
+      - feedbacks
+      - feedbacks-dev
+    volumes:
+      - feedback-redis-data:/data
+
+networks:
+  feedbacks_net:
+    external: true
+
+volumes:
+  feedback-redis-data:
