@@ -1,4 +1,10 @@
-- pipeline.id: "LOGS-NGINS"
+- pipeline.id: "LOGS"
   pipeline.workers: 4
   pipeline.batch.size: 250
+  config.string: |
+    input { beats { port => 5044 } }
+    output { pipeline { send_to => [logs_nginx, logs_es_initer] } }
+- pipeline.id: "LOGS-NGINX"
   path.config: "./config/pipelines/nginx_pipeline.conf"
+- pipeline.id: "LOGS-ES-INITER"
+  path.config: "./config/pipelines/es_initer.conf"
