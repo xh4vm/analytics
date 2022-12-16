@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from functools import wraps
+from uuid import UUID
 
 import dateutil.parser
 from bson import ObjectId
@@ -46,3 +47,7 @@ def get_time(func):
         result = func(*args, **kwargs)
         return result, start_time, datetime.now() - start_time
     return wrapper
+
+
+def str_if_uuid(value):
+    return str(value) if isinstance(value, UUID) else value

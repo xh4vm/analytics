@@ -8,13 +8,11 @@ from core.config import SETTINGS
 from fastapi import HTTPException
 
 
-async def check_result(result, errors: list, messages):
-    if not result:
-        details = '{0} {1}'.format(messages, '\n'.join(errors))
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=details.strip()
-        )
+async def check_result(result, errors: dict, messages):
+    if errors:
+        raise HTTPException(status_code=errors['status'], detail=errors['message'])
+    if not result and not errors:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=messages)
 
 
 def fatal_error(err):

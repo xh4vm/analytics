@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
+from http import HTTPStatus
 
 from core.config import SETTINGS
 from core.settings import Messages
@@ -7,6 +8,7 @@ from db.mongodb.mongodb import AsyncMongoDB
 from db.redis import AsyncCacheStorage
 from models.base import ResponseMDB
 from models.like import FilmsLikes, Like
+from pymongo.errors import DuplicateKeyError
 
 
 class BaseSearchService(ABC):
@@ -33,7 +35,7 @@ class MongoDBService(BaseSearchService):
 
     model: None
     query = None
-    errors = []
+    errors = None
 
     def __init__(self, cache: AsyncCacheStorage, source: AsyncMongoDB, mess: Messages):
         """ Init object of BaseService class. """
@@ -51,12 +53,16 @@ class MongoDBService(BaseSearchService):
             '{0}',
         )
 
-        self.errors = []
+        self.errors = {}
 
     async def create_doc(self, params: dict, **kwargs):
+        current_model = kwargs.get('model', self.model)
         doc = {**params, 'created': datetime.utcnow(), 'modified': datetime.utcnow()}
-        result = await self.data_source.insert_one(self.model.Config.collection, doc)
-        return self.model.parse_obj({**doc, 'id': str(result.inserted_id)})
+        err, result = await self.data_source.insert_one(current_model.Config.collection, doc)
+        if isinstance(err, DuplicateKeyError):
+            self.errors = {'status': HTTPStatus.CONFLICT, 'message': err.args[0]}
+            return None
+        return current_model.parse_obj({**doc, 'id': str(result.inserted_id)})
 
     async def update_doc(self, find: dict, update: dict, **kwargs):
 

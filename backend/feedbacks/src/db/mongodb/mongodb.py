@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from pymongo import ReturnDocument
+from pymongo.errors import DuplicateKeyError
 
 
 class AsyncDBStorage(ABC):
@@ -23,7 +24,7 @@ class AsyncDBStorage(ABC):
         pass
 
     @abstractmethod
-    async def find(self, collection: str, query: dict, *args, **kwargs):
+    async def find(self, collection: str, query: dict, options: dict, *args, **kwargs):
         pass
 
     @abstractmethod
@@ -49,17 +50,28 @@ class AsyncMongoDB(AsyncDBStorage):
         res = await self.cl[db_name].command(command)
         return res
 
-    async def aggregate(self, collection: str, match: dict, group: dict):
-        cursor = self.db.get_collection(collection).aggregate(pipeline=[match, group])
-        result = []
+    async def aggregate(
+            self,
+            collection: str,
+            match: dict = None,
+            group: dict = None,
+            lookup: dict = None,
+            project: dict = None,
+            limit: dict = None,
+            skip: dict = None
+    ):
 
-        async for doc in cursor:
-            result.append(doc)
+        pipeline = [command_obj for command_obj in (lookup, project, match, group, skip, limit) if command_obj]
+        cursor = self.db.get_collection(collection).aggregate(pipeline=pipeline)
+        result = [doc async for doc in cursor]
 
         return result
 
     async def insert_one(self, collection: str, data: dict,  *args, **kwargs):
-        return await self.db.get_collection(collection).insert_one(data)
+        try:
+            return None, await self.db.get_collection(collection).insert_one(data)
+        except DuplicateKeyError as err:
+            return err, None
 
     async def update_one(self, collection: str, find: dict, update: dict, *args, **kwargs):
         result = await self.db.get_collection(collection).find_one_and_update(
@@ -73,8 +85,10 @@ class AsyncMongoDB(AsyncDBStorage):
         result = await self.db.get_collection(collection).delete_one(data)
         return result.acknowledged
 
-    async def find(self, collection: str, query: dict, *args, **kwargs):
-        pass
+    async def find(self, collection: str, query: dict, options: dict, *args, **kwargs):
+        cursor = self.db.get_collection(collection).find(query, {}, **options)
+
+        return [doc async for doc in cursor]
 
     async def count(self, collection: str, query: dict, *args, **kwargs) -> int:
         return await self.db.get_collection(collection).count_documents(query)

@@ -1,13 +1,13 @@
-""" Router for Films service. """
+""" Router for Likes service. """
 
 from api.v1.params import FilmUserIDsParams, RatingParams
 from api.v1.utilitys import check_result
 from db.redis import use_cache
 from fastapi import APIRouter, Depends, Request
 from models.base import ResponseMDB
+from models.like import FilmsLikes
 from pydantic.types import UUID4
-from services.like import (FilmsAvgRating, FilmsLikes, Like, LikeService,
-                           get_like_service)
+from services.like import FilmsAvgRating, Like, LikeService, get_like_service
 
 router = APIRouter()
 
@@ -111,7 +111,7 @@ async def create_like(
     response_description='Update user\'s like of films.',
     tags=['Likes'],
 )
-async def edit_like(
+async def update_like(
         request: Request,
         params: FilmUserIDsParams = Depends(),
         rating: RatingParams = Depends(),
@@ -157,7 +157,7 @@ async def delete_like(
     Returns:
         Like: user's like of films
     """
-    like = await obj_service.delete_doc(params.get_dict())
-    await check_result(like, obj_service.errors, obj_service.messages.list_empty)
+    result = await obj_service.delete_doc(params.get_dict())
+    await check_result(result, obj_service.errors, obj_service.messages.list_empty)
 
-    return like
+    return result
