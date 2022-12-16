@@ -7,7 +7,6 @@ from core.settings import Messages
 from db.mongodb.mongodb import AsyncMongoDB
 from db.redis import AsyncCacheStorage
 from models.base import ResponseMDB
-from models.like import FilmsLikes, Like
 from pymongo.errors import DuplicateKeyError
 
 
@@ -44,15 +43,6 @@ class MongoDBService(BaseSearchService):
         self.data_cache = cache
         self.messages = mess
 
-        self.messages.not_found_index = self.messages.not_found_index.format(
-            self.model.Config.collection,
-            self.model.Config.alias
-        )
-        self.messages.not_search_result = self.messages.not_search_result.format(
-            self.model.Config.alias,
-            '{0}',
-        )
-
         self.errors = {}
 
     async def create_doc(self, params: dict, **kwargs):
@@ -75,6 +65,10 @@ class MongoDBService(BaseSearchService):
     async def delete_doc(self, params: dict, **kwargs):
 
         result = await self.data_source.delete_one(self.model.Config.collection, params)
+
+        if result.acknowledged and result.deleted_count == 0:
+            return None
+
         return ResponseMDB(result=result)
 
     async def get_doc_avg_rating(self, data: dict):
@@ -88,7 +82,8 @@ class MongoDBService(BaseSearchService):
         result = await self.data_source.aggregate(self.model.Config.collection, match, group)
         return result[0] if result else None
 
-    async def get_doc_likes(self, field_name: str, field_value: str, model: type(Like) | type(FilmsLikes)):
+    async def get_number_doc_likes(self, field_name: str, field_value: str, **kwargs):
+        current_model = kwargs.get('model', self.model)
         query = {
             '$and': [
                 {field_name: {'$eq': field_value}},
@@ -101,7 +96,11 @@ class MongoDBService(BaseSearchService):
         query['$and'][1]['rating'] = SETTINGS.MONGODB.DISLIKE
         number_dislikes = await self.data_source.count('likes', query)
 
-        result = model.parse_obj(
+        result = current_model.parse_obj(
             {field_name: field_value, 'number_likes': number_likes, 'number_dislikes': number_dislikes}
         )
+        return result
+
+    async def get_doc_list(self, **kwargs):
+        result = await self.data_source.find(collection=self.model.Config.collection, query=kwargs)
         return result

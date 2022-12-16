@@ -21,7 +21,7 @@ router = APIRouter()
     tags=['Likes'],
 )
 @use_cache(model=FilmsLikes)
-async def get_films_likes(
+async def get_number_films_likes(
         request: Request,
         film_id: UUID4,
         obj_service: LikeService = Depends(get_like_service),
@@ -36,7 +36,7 @@ async def get_films_likes(
     Returns:
         FilmsLikes: likes of films
     """
-    films_likes = await obj_service.get_doc_likes('film_id', str(film_id), FilmsLikes)
+    films_likes = await obj_service.get_number_doc_likes('film_id', str(film_id), model=FilmsLikes)
     await check_result(films_likes, obj_service.errors, obj_service.messages.list_empty)
 
     return films_likes
@@ -64,7 +64,7 @@ async def get_films_avg_rating(
         obj_service: service object
 
     Returns:
-        FilmsLikes: likes of films
+        FilmsAvgRating: average of rating of films
     """
     films_avg_rating = await obj_service.get_film_avg_rating(str(film_id))
     await check_result(films_avg_rating, obj_service.errors, obj_service.messages.list_empty)
@@ -155,7 +155,7 @@ async def delete_like(
         obj_service: service object
 
     Returns:
-        Like: user's like of films
+        ResponseMDB: respond
     """
     result = await obj_service.delete_doc(params.get_dict())
     await check_result(result, obj_service.errors, obj_service.messages.list_empty)

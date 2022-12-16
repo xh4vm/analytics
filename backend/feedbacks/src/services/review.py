@@ -66,13 +66,6 @@ class ReviewService(MongoDBService):
 
     async def get_reviews_list(self, **kwargs):
 
-        # if not kwargs['filter_likes']:
-        #     return await self.data_source.find(
-        #         self.model.Config.collection,
-        #         query=kwargs['filters'],
-        #         options=kwargs['params'],
-        #     )
-
         lookup, project = self.format_command()
 
         match = None
@@ -110,9 +103,9 @@ def get_review_service(
         messages: messages
 
     Returns:
-        PersonService: like service
+        ReviewService: review service
     """
 
-    messages.list_empty = messages.list_empty.format('likes')
+    messages.list_empty = messages.list_empty.format('reviews')
 
     return ReviewService(cache, db_storage_source, messages)

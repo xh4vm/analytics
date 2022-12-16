@@ -53,10 +53,7 @@ class Settings(BaseSettings):
 class Messages(BaseModel):
     """ Class for setup message fot service. """
 
-    list_empty: str = 'List of {0} is empty'
-    not_found_index: str = 'Not found index {0} for model {1}.'
-    not_found_doc: str = '{0} with ID {1} not found.'
-    not_search_result: str = 'Documents of model {0} according to query string <{1}> not found.'
+    list_empty: str = 'Data of {0} not found'
 
     def __hash__(self):
         return hash(self.json())

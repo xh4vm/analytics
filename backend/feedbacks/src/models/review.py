@@ -1,22 +1,18 @@
 """ Model Review. """
 
-from datetime import datetime
-
 from bson import ObjectId
 from pydantic import Field, validator
 
-from .base import BaseMixin, PyObjectId
+from .base import BaseMixin, DateMixin, PyObjectId
 
 
-class Review(BaseMixin):
+class Review(BaseMixin, DateMixin):
     """ Class for Film review model. """
 
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     user_id: str
     film_id: str
     text: str = Field('Text film review', max_length=1000)
-    created: datetime = None
-    modified: datetime = None
 
     class Config:
         collection = 'reviews'
@@ -31,15 +27,13 @@ class Review(BaseMixin):
         return str(v)
 
 
-class ReviewLike(BaseMixin):
+class ReviewLike(BaseMixin, DateMixin):
     """ Class for Review like model. """
 
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     user_id: str = None
     review_id: PyObjectId = Field(default_factory=PyObjectId)
     rating: int = None
-    created: datetime = None
-    modified: datetime = None
 
     class Config:
         collection = 'reviews_likes'

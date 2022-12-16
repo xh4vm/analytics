@@ -1,22 +1,18 @@
 """ Model Like. """
 
-from datetime import datetime
-
 from bson import ObjectId
 from pydantic import Field, validator
 
-from .base import BaseMixin, PyObjectId
+from .base import BaseMixin, DateMixin, PyObjectId
 
 
-class Like(BaseMixin):
+class Like(BaseMixin, DateMixin):
     """ Class for Film like model. """
 
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     user_id: str = None
     film_id: str = None
     rating: int = None
-    created: datetime = None
-    modified: datetime = None
 
     class Config:
         collection = 'likes'

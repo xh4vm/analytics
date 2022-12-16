@@ -1,5 +1,7 @@
 """ Base class for models. """
 
+from datetime import datetime
+
 import orjson
 from bson import ObjectId
 from pydantic import BaseModel
@@ -19,6 +21,11 @@ class BaseMixin(BaseModel):
         json_loads = orjson.loads
         json_dumps = orjson_dumps
         cache_free = False
+
+
+class DateMixin(BaseModel):
+    created: datetime = None
+    modified: datetime = None
 
 
 class ResponseMDB(BaseModel):

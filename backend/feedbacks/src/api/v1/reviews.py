@@ -37,7 +37,7 @@ async def get_reviews_list(
         obj_service: service object
 
     Returns:
-        Like: user's like of films
+        list[ReviewFull]: user's list of film's review
     """
     reviews = await obj_service.get_reviews_list(
         params=params,
@@ -72,7 +72,7 @@ async def create_review(
         obj_service: service object
 
     Returns:
-        Like: user's like of films
+        Review: film's review
     """
     review = await obj_service.create_doc({**params.get_dict(), 'text': text_review})
     await check_result(review, obj_service.errors, obj_service.messages.list_empty)
@@ -103,7 +103,7 @@ async def update_review(
         obj_service: service object
 
     Returns:
-        Like: user's like of films
+        Review: film's review
     """
     review = await obj_service.update_review({**params.get_dict(), 'text': text_review})
     await check_result(review, obj_service.errors, obj_service.messages.list_empty)
@@ -132,7 +132,7 @@ async def delete_review(
         obj_service: service object
 
     Returns:
-        Like: user's like of films
+        ResponseMDB: respond
     """
     result = await obj_service.delete_doc(params.get_dict())
     await check_result(result, obj_service.errors, obj_service.messages.list_empty)
@@ -163,7 +163,7 @@ async def create_review_like(
         obj_service: service object
 
     Returns:
-        Like: user's like of films
+        Review: film's review
     """
     review = await obj_service.create_review_like({**params.get_dict(), 'rating': rating.rating}, model=ReviewLike)
     await check_result(review, obj_service.errors, obj_service.messages.list_empty)

@@ -44,7 +44,7 @@ def get_like_service(
         messages: messages
 
     Returns:
-        PersonService: like service
+        LikeService: like service
     """
 
     messages.list_empty = messages.list_empty.format('likes')

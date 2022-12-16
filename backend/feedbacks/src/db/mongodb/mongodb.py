@@ -83,9 +83,10 @@ class AsyncMongoDB(AsyncDBStorage):
 
     async def delete_one(self, collection: str, data: dict, *args, **kwargs):
         result = await self.db.get_collection(collection).delete_one(data)
-        return result.acknowledged
+        return result
 
-    async def find(self, collection: str, query: dict, options: dict, *args, **kwargs):
+    async def find(self, collection: str, query: dict, options: dict = None, *args, **kwargs):
+        options = options or {}
         cursor = self.db.get_collection(collection).find(query, {}, **options)
 
         return [doc async for doc in cursor]
