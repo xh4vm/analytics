@@ -2,23 +2,172 @@ version: '3.8'
 
 x-base-service: &base_service
   networks:
-    - feedbacks_net
+    - analytics
 
-x-base-profile-feedback: &base-profile-feedback
-  profiles:
-    - feedbacks
-
-x-base-profile-feedback-dev: &base-profile-feedback-dev
-  profiles:
-    - feedbacks-dev
-
-x-base-profile-mongo: &base-profile-mongo
-  profiles:
-    - mongo
+x-redis: &base_redis
   <<: *base_service
+  image: redis:7.0-alpine
+  container_name: redis
+  restart: unless-stopped
+  ports:
+    - ${REDIS_PORT}:6379
+  healthcheck:
+    test: ["CMD", "redis-cli","ping"]
+    interval: 30s
+    timeout: 10s
+    retries: 5
+
+x-base-logstash: &base_logstash
+  <<: *base_service
+  build: backend/logstash
+  container_name: logstash
+  depends_on: 
+    elasticsearch: 
+      condition: service_healthy
+  mem_limit: 2g
+  environment:
+    - LOGSTASH_JDBC_USERNAME=${LOGSTASH_USER}
+    - LOGSTASH_JDBC_PASSWORD=${LOGSTASH_PASSWORD}
+    - LOGSTASH_ELASTICSEARCH_HOST=${ES_PROTOCOL}://${LOGSTASH_USER}:${LOGSTASH_PASSWORD}@${ES_HOST}:${ES_PORT}
+  volumes:
+      - ./backend/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./backend/logstash/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro
+      - ./backend/logstash/config//pipelines/:/usr/share/logstash/config/pipelines/:ro
+  expose:
+    - ${LOGSTASH_PORT}
 
 services:
+
+  nginx:
+    <<: *base_service
+    image: nginx:1.23.1-alpine
+    container_name: nginx
+    env_file: .env
+    profiles: 
+      - analytics
+    depends_on: 
+      kibana:
+        condition: service_healthy
+    volumes:
+      - ./backend/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./backend/nginx/configs:/etc/nginx/conf.d:ro
+      - ./backend/nginx/static/errors:/var/www/errors/:ro
+      - ./backend/nginx/static/log/access_log:/var/log/nginx/access.log:rw
+      - ./backend/nginx/static/log/error_log:/var/log/nginx/error.log:rw
+    ports:
+      - ${KIBANA_PORT}:${KIBANA_PORT}
+      - ${PROJECT_FEEDBACKS_API_PORT}:${PROJECT_FEEDBACKS_API_PORT}
+
+  redis:
+    <<: *base_redis
+    profiles:
+      - analytics
+      - feedbacks
+      - feedbacks-dev
+    volumes:
+      - redis-data:/data
+
+  elasticsearch:
+    <<: *base_service
+    image: docker.io/elastic/elasticsearch:8.5.3
+    container_name: elasticsearch
+    env_file: .env
+    profiles:
+      - analytics
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - ELASTIC_USERNAME=${ES_USER}
+      - ELASTIC_PASSWORD=${ES_PASSWORD}
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data:rw
+    expose:
+      - ${ES_PORT}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 2g
+    healthcheck:
+      test: curl ${ES_PROTOCOL}://${ES_USER}:${ES_PASSWORD}@${ES_HOST}:${ES_PORT} >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  es-initer:
+    <<: *base_service
+    build: ./backend/es_initer
+    container_name: es-initer
+    env_file: .env
+    profiles: 
+      - analytics
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    volumes:
+      - ./backend/es_initer/static/log.txt:/var/log/elasticsearch-initer/log.txt
+
+  kibana:
+    <<: *base_service
+    image: docker.io/elastic/kibana:8.5.3
+    container_name: kibana
+    env_file: .env
+    depends_on: 
+      elasticsearch: 
+        condition: service_healthy
+    mem_limit: 2g
+    profiles:
+      - analytics
+    volumes:
+      - ./backend/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+    environment:
+      - ELASTICSEARCH_HOSTS=${ES_PROTOCOL}://${KIBANA_USER}:${KIBANA_PASSWORD}@${ES_HOST}:${ES_PORT}
+      - ELASTICSEARCH_USERNAME=${KIBANA_USER}
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+    expose:
+      - ${KIBANA_PORT}
+    healthcheck:
+      test: curl http://kibana:${KIBANA_PORT} >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  logstash01:
+    <<: *base_logstash
+    env_file: .env
+    profiles:
+      - analytics
+    container_name: logstash01
+
+  logstash02:
+    <<: *base_logstash
+    env_file: .env
+    profiles:
+      - analytics
+    container_name: logstash02
+    
+  filebeat:
+    <<: *base_service
+    image: docker.io/elastic/filebeat:8.5.3
+    container_name: filebeat
+    env_file: .env
+    entrypoint: "filebeat -e -strict.perms=false"
+    volumes:
+      - ./backend/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./backend/nginx/static/log/access_log:/var/log/nginx/access.log
+      - ./backend/nginx/static/log/error_log:/var/log/nginx/error.log
+      - ./backend/es_initer/static/log.txt:/var/log/elasticsearch-initer/log.txt
+    profiles: 
+      - analytics
+    depends_on:
+      - logstash01
+      - logstash02
+      - nginx
+      - es-initer
+
   mongors1n1:
+    <<: *base_service
     container_name: mongors1n1
     image: mongo
     command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
@@ -27,9 +176,12 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /tmp/mongo_cluster1/data1:/data/db
-    <<: *base-profile-mongo
+    profiles: 
+      - analytics
+      - mongo
 
   mongors1n2:
+    <<: *base_service
     container_name: mongors1n2
     image: mongo
     command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
@@ -38,9 +190,12 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /tmp/mongo_cluster1/data2:/data/db
-    <<: *base-profile-mongo
+    profiles: 
+      - analytics
+      - mongo
 
   mongors1n3:
+    <<: *base_service
     container_name: mongors1n3
     image: mongo
     command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
@@ -49,9 +204,12 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /tmp/mongo_cluster1/data3:/data/db
-    <<: *base-profile-mongo
+    profiles: 
+      - analytics
+      - mongo
 
   mongors2n1:
+    <<: *base_service
     container_name: mongors2n1
     image: mongo
     command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
@@ -60,9 +218,12 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /tmp/mongo_cluster1/data4:/data/db
-    <<: *base-profile-mongo
+    profiles: 
+      - analytics
+      - mongo
 
   mongors2n2:
+    <<: *base_service
     container_name: mongors2n2
     image: mongo
     command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
@@ -71,9 +232,12 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /tmp/mongo_cluster1/data5:/data/db
-    <<: *base-profile-mongo
+    profiles: 
+      - analytics
+      - mongo
 
   mongors2n3:
+    <<: *base_service
     container_name: mongors2n3
     image: mongo
     command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
@@ -82,9 +246,12 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /tmp/mongo_cluster1/data6:/data/db
-    <<: *base-profile-mongo
+    profiles: 
+      - analytics
+      - mongo
 
   mongocfg1:
+    <<: *base_service
     container_name: mongocfg1
     image: mongo
     command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
@@ -93,9 +260,12 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /tmp/mongo_cluster1/config1:/data/db
-    <<: *base-profile-mongo
+    profiles: 
+      - analytics
+      - mongo
 
   mongocfg2:
+    <<: *base_service
     container_name: mongocfg2
     image: mongo
     command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
@@ -104,9 +274,12 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /tmp/mongo_cluster1/config2:/data/db
-    <<: *base-profile-mongo
+    profiles: 
+      - analytics
+      - mongo
 
   mongocfg3:
+    <<: *base_service
     container_name: mongocfg3
     image: mongo
     command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
@@ -115,9 +288,12 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /tmp/mongo_cluster1/config3:/data/db
-    <<: *base-profile-mongo
+    profiles: 
+      - analytics
+      - mongo
 
   mongos1:
+    <<: *base_service
     container_name: mongos1
     image: mongo
     hostname: mongos1
@@ -130,9 +306,12 @@ services:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-    <<: *base-profile-mongo
+    profiles: 
+      - analytics
+      - mongo
 
   mongos2:
+    <<: *base_service
     container_name: mongos2
     image: mongo
     hostname: mongos2
@@ -145,26 +324,9 @@ services:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-    <<: *base-profile-mongo
-
-  redis:
-    <<: *base_service
-    image: redis:7.0-alpine
-    container_name: redis
-    hostname: redis-api
-    restart: unless-stopped
-    ports:
-      - ${REDIS_PORT}:6379
-    healthcheck:
-      test: [ "CMD", "redis-cli","ping" ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-    profiles:
-      - feedbacks
-      - feedbacks-dev
-    volumes:
-      - feedback-redis-data:/data
+    profiles: 
+      - analytics
+      - mongo
 
   feedbacks-api:
     <<: *base_service
@@ -173,31 +335,17 @@ services:
     env_file: .env
     profiles:
       - feedbacks
+      - analytics
     expose:
       - ${PROJECT_FEEDBACKS_API_PORT}
     depends_on:
       - redis
 
-  nginx:
-    <<: *base_service
-    image: nginx:1.23.1-alpine
-    container_name: nginx
-    profiles:
-      - feedbacks
-    volumes:
-      - ./backend/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./backend/nginx/configs/feedbacks.conf:/etc/nginx/conf.d/feedbacks.conf:ro
-      - ./backend/nginx/static/errors:/var/www/errors/:ro
-      - ./backend/nginx/static/log/access_log:/var/log/nginx/access.log:rw
-      - ./backend/nginx/static/log/error_log:/var/log/nginx/error.log:rw
-    depends_on:
-      - feedbacks-api
-    ports:
-      - ${PROJECT_FEEDBACKS_API_PORT}:${PROJECT_FEEDBACKS_API_PORT}
-
 networks:
-  feedbacks_net:
-    external: true
+  analytics:
+    driver: bridge
+  
 
 volumes:
-  feedback-redis-data:
+  elasticsearch-data:
+  redis-data:
