@@ -142,3 +142,7 @@ commands.md
 *._cache
 .env_local
 backend/auth/api/migrations
+
+/.venv/
+.idea/
+*__pycache__

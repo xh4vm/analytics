@@ -164,16 +164,183 @@ services:
       - nginx
       - es-initer
 
-  # jaeger-all-in-one:
-  #   <<: *base_service
-  #   image: jaegertracing/all-in-one:1.37
-  #   container_name: jaeger
-  #   env_file: .env
-  #   profiles: 
-  #     - analytics
-  #   ports:
-  #     - ${JAEGER_UI_PORT}:16686
-  #     - ${JAEGER_AGENT_PORT}:6381/udp
+  mongors1n1:
+    <<: *base_service
+    container_name: mongors1n1
+    image: mongo
+    command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
+    ports:
+      - 27017:27017
+    expose:
+      - "27017"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /tmp/mongo_cluster/data1:/data/db
+    profiles: 
+      - analytics
+      - mongo
+
+  mongors1n2:
+    <<: *base_service
+    container_name: mongors1n2
+    image: mongo
+    command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
+    ports:
+      - 27027:27017
+    expose:
+      - "27017"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /tmp/mongo_cluster/data2:/data/db
+    profiles: 
+      - analytics
+      - mongo
+
+  mongors1n3:
+    <<: *base_service
+    container_name: mongors1n3
+    image: mongo
+    command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
+    ports:
+      - 27037:27017
+    expose:
+      - "27017"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /tmp/mongo_cluster/data3:/data/db
+    profiles: 
+      - analytics
+      - mongo
+
+  mongors2n1:
+    <<: *base_service
+    container_name: mongors2n1
+    image: mongo
+    command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
+    ports:
+      - 27047:27017
+    expose:
+      - "27017"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /tmp/mongo_cluster/data4:/data/db
+    profiles: 
+      - analytics
+      - mongo
+
+  mongors2n2:
+    <<: *base_service
+    container_name: mongors2n2
+    image: mongo
+    command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
+    ports:
+      - 27057:27017
+    expose:
+      - "27017"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /tmp/mongo_cluster/data5:/data/db
+    profiles: 
+      - analytics
+      - mongo
+
+  mongors2n3:
+    <<: *base_service
+    container_name: mongors2n3
+    image: mongo
+    command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
+    ports:
+      - 27067:27017
+    expose:
+      - "27017"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /tmp/mongo_cluster/data6:/data/db
+    profiles: 
+      - analytics
+      - mongo
+
+  mongocfg1:
+    <<: *base_service
+    container_name: mongocfg1
+    image: mongo
+    command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
+    expose:
+      - "27017"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /tmp/mongo_cluster/config1:/data/db
+    profiles: 
+      - analytics
+      - mongo
+
+  mongocfg2:
+    <<: *base_service
+    container_name: mongocfg2
+    image: mongo
+    command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
+    expose:
+      - "27017"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /tmp/mongo_cluster/config2:/data/db
+    profiles: 
+      - analytics
+      - mongo
+
+  mongocfg3:
+    <<: *base_service
+    container_name: mongocfg3
+    image: mongo
+    command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
+    expose:
+      - "27017"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /tmp/mongo_cluster/config3:/data/db
+    profiles: 
+      - analytics
+      - mongo
+
+  mongos1:
+    <<: *base_service
+    container_name: mongos1
+    image: mongo
+    hostname: mongos1
+    depends_on:
+      - mongocfg1
+      - mongocfg2
+      - mongocfg3
+    command: mongos --configdb mongors1conf/mongocfg1:27017,mongocfg2:27017,mongocfg3:27017 --port 27017 --bind_ip 0.0.0.0
+    ports:
+      - 27019:27017
+    expose:
+      - "27017"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    profiles: 
+      - analytics
+      - mongo
+
+  mongos2:
+    <<: *base_service
+    container_name: mongos2
+    image: mongo
+    hostname: mongos2
+    depends_on:
+      - mongocfg1
+      - mongocfg2
+      - mongocfg3
+    command: mongos --configdb mongors1conf/mongocfg1:27017,mongocfg2:27017,mongocfg3:27017 --port 27017 --bind_ip 0.0.0.0
+    ports:
+      - 27020:27017
+    expose:
+      - "27017"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    profiles: 
+      - analytics
+      - mongo
 
 
 networks:
