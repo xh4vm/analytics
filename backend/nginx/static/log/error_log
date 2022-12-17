@@ -1,0 +1,9 @@
+2022/11/30 15:51:13 [error] 32#32: *2 connect() failed (111: Connection refused) while connecting to upstream, client: 172.27.0.1, server: _, request: "GET /api/openapi HTTP/1.1", upstream: "http://172.27.0.4:60666/api/openapi", host: "localhost:60666"
+2022/11/30 16:00:29 [error] 32#32: *2 connect() failed (111: Connection refused) while connecting to upstream, client: 172.27.0.1, server: _, request: "GET /api/openapi HTTP/1.1", upstream: "http://172.27.0.2:60666/api/openapi", host: "localhost:60666"
+2022/11/30 16:00:31 [error] 32#32: *2 connect() failed (111: Connection refused) while connecting to upstream, client: 172.27.0.1, server: _, request: "GET /api/openapi HTTP/1.1", upstream: "http://172.27.0.2:60666/api/openapi", host: "localhost:60666"
+2022/11/30 16:00:34 [error] 32#32: *2 connect() failed (111: Connection refused) while connecting to upstream, client: 172.27.0.1, server: _, request: "GET /api/openapi HTTP/1.1", upstream: "http://172.27.0.2:60666/api/openapi", host: "localhost:60666"
+2022/11/30 16:01:54 [error] 32#32: *6 connect() failed (111: Connection refused) while connecting to upstream, client: 172.27.0.1, server: _, request: "GET /api/openapi HTTP/1.1", upstream: "http://172.27.0.2:60666/api/openapi", host: "localhost:60666"
+2022/11/30 16:06:01 [error] 32#32: *9 connect() failed (111: Connection refused) while connecting to upstream, client: 172.27.0.1, server: _, request: "GET /api/openapi HTTP/1.1", upstream: "http://172.27.0.2:60666/api/openapi", host: "localhost:60666"
+2022/12/04 15:04:16 [emerg] 1#1: host not found in upstream "producer-storage" in /etc/nginx/conf.d/producer_storage.conf:13
+2022/12/16 17:55:29 [emerg] 1#1: host not found in upstream "feedback-api" in /etc/nginx/conf.d/feedbacks.conf:13
+2022/12/17 08:44:10 [emerg] 1#1: host not found in upstream "feedback-api" in /etc/nginx/conf.d/feedbacks.conf:13

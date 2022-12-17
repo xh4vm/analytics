@@ -21,6 +21,7 @@ fastapi-jwt-auth = "0.5.0"
 pymongo = "4.3.3"
 pydantic = {extras = ["dotenv"], version = "1.10.2"}
 motor = "3.1.1"
+python-dateutil = "2.4"
 
 
 

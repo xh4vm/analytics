@@ -69,7 +69,7 @@ class MongoDBService(BaseSearchService):
         if result.acknowledged and result.deleted_count == 0:
             return None
 
-        return ResponseMDB(result=result)
+        return ResponseMDB(result=result.acknowledged)
 
     async def get_doc_avg_rating(self, data: dict):
         match = {'$match': data}

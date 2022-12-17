@@ -37,6 +37,7 @@ class Settings(BaseSettings):
 
     REDIS = RedisS().parse_obj(RedisS().dict())
     MONGODB = MongoSettings().parse_obj(MongoSettings().dict())
+    FEEDBACKS_API_PORT: int
     NAME: str
     DESCRIPTION: str
     VERSION: str

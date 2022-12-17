@@ -94,3 +94,7 @@ create_net:
 .PHONY: run feedbacks dev docker containers
 run_feedbacks_dev:
 	sudo docker-compose --profile feedbacks-dev up
+
+.PHONY: run feedbacks docker containers
+run_feedbacks:
+	sudo docker-compose --profile feedbacks up --build

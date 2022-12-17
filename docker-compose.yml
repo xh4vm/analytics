@@ -22,8 +22,6 @@ services:
     container_name: mongors1n1
     image: mongo
     command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
-    ports:
-      - 27017:27017
     expose:
       - "27017"
     volumes:
@@ -35,8 +33,6 @@ services:
     container_name: mongors1n2
     image: mongo
     command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
-    ports:
-      - 27027:27017
     expose:
       - "27017"
     volumes:
@@ -48,8 +44,6 @@ services:
     container_name: mongors1n3
     image: mongo
     command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
-    ports:
-      - 27037:27017
     expose:
       - "27017"
     volumes:
@@ -61,8 +55,6 @@ services:
     container_name: mongors2n1
     image: mongo
     command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
-    ports:
-      - 27047:27017
     expose:
       - "27017"
     volumes:
@@ -74,8 +66,6 @@ services:
     container_name: mongors2n2
     image: mongo
     command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
-    ports:
-      - 27057:27017
     expose:
       - "27017"
     volumes:
@@ -87,8 +77,6 @@ services:
     container_name: mongors2n3
     image: mongo
     command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
-    ports:
-      - 27067:27017
     expose:
       - "27017"
     volumes:
@@ -137,9 +125,7 @@ services:
       - mongocfg1
       - mongocfg2
       - mongocfg3
-    command: mongos --configdb mongors1conf/mongocfg1:27017,mongocfg2:27017,mongocfg3:27017 --port 27017 --bind_ip 0.0.0.0
-    ports:
-      - 27019:27017
+    command: mongos --configdb mongors1conf/mongocfg1:27017,mongocfg2:27017,mongocfg3:27017 --port 27017 --bind_ip_all
     expose:
       - "27017"
     volumes:
@@ -154,9 +140,7 @@ services:
       - mongocfg1
       - mongocfg2
       - mongocfg3
-    command: mongos --configdb mongors1conf/mongocfg1:27017,mongocfg2:27017,mongocfg3:27017 --port 27017 --bind_ip 0.0.0.0
-    ports:
-      - 27020:27017
+    command: mongos --configdb mongors1conf/mongocfg1:27017,mongocfg2:27017,mongocfg3:27017 --port 27017 --bind_ip_all
     expose:
       - "27017"
     volumes:
@@ -167,6 +151,7 @@ services:
     <<: *base_service
     image: redis:7.0-alpine
     container_name: redis
+    hostname: redis-api
     restart: unless-stopped
     ports:
       - ${REDIS_PORT}:6379
@@ -180,6 +165,35 @@ services:
       - feedbacks-dev
     volumes:
       - feedback-redis-data:/data
+
+  feedbacks-api:
+    <<: *base_service
+    build: ./backend/feedbacks
+    container_name: feedbacks-api
+    env_file: .env
+    profiles:
+      - feedbacks
+    expose:
+      - ${PROJECT_FEEDBACKS_API_PORT}
+    depends_on:
+      - redis
+
+  nginx:
+    <<: *base_service
+    image: nginx:1.23.1-alpine
+    container_name: nginx
+    profiles:
+      - feedbacks
+    volumes:
+      - ./backend/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./backend/nginx/configs/feedbacks.conf:/etc/nginx/conf.d/feedbacks.conf:ro
+      - ./backend/nginx/static/errors:/var/www/errors/:ro
+      - ./backend/nginx/static/log/access_log:/var/log/nginx/access.log:rw
+      - ./backend/nginx/static/log/error_log:/var/log/nginx/error.log:rw
+    depends_on:
+      - feedbacks-api
+    ports:
+      - ${PROJECT_FEEDBACKS_API_PORT}:${PROJECT_FEEDBACKS_API_PORT}
 
 networks:
   feedbacks_net:

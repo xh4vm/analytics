@@ -1,4 +1,4 @@
-FROM python:3.10.6
+FROM python:3.10.7
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -30,5 +30,5 @@ WORKDIR /opt/app
 
 COPY ./src .
 
-CMD ["main:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
+CMD ["main:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8080"]
 ENTRYPOINT ["gunicorn"]
