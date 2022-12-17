@@ -1,34 +1,20 @@
-FROM python:3.10.7
+FROM python:3.10-slim AS feedbacks-builder
 
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=off \
-    PIP_DISABLE_PIP_VERSION_CHECK=on \
-    PIP_DEFAULT_TIMEOUT=100 \
-    POETRY_VERSION=1.1.14 \
-    POETRY_HOME="/opt/poetry" \
-    POETRY_VIRTUALENVS_IN_PROJECT=true \
-    POETRY_NO_INTERACTION=1 \
-    PYSETUP_PATH="/opt/pysetup" \
-    VENV_PATH="/opt/pysetup/.venv"
+WORKDIR /opt
+COPY requirements.txt ./
 
-ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
+RUN apt-get update && apt-get install -y --no-install-recommends gcc musl-dev libc-dev librdkafka-dev && \
+     pip install --upgrade pip \
+     && pip install wheel && pip3 wheel -r requirements.txt --wheel-dir=/opt/wheels
 
-RUN apt-get update \
-    && apt-get install --no-install-recommends -y \
-        curl \
-        build-essential
 
-RUN curl -sSL https://install.python-poetry.org | python3 -
+FROM python:3.10-slim
 
-WORKDIR $PYSETUP_PATH
-COPY pyproject.toml pyproject.toml
+COPY --from=feedbacks-builder /opt /opt
+ENV PYTHONPATH "/opt/content/modules/auth/src/:/opt/content/modules/auth/src:/opt/content/modules/auth/src/messages"
 
-RUN poetry install
+WORKDIR /opt/content
+ENTRYPOINT ["/bin/bash", "-c", "chmod +x ./start.sh && ./start.sh"]
 
-WORKDIR /opt/app
-
-COPY ./src .
-
-CMD ["main:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8080"]
-ENTRYPOINT ["gunicorn"]
+COPY . .
+RUN pip install --no-index --find-links=/opt/wheels -r requirements.txt
