@@ -1,0 +1,92 @@
+2022-12-13T00:16:51.629031+0300 | INFO | <likes>. Добавлено документов 1 из 1
+2022-12-13T00:16:51.629259+0300 | INFO | <likes>. Время загрузки данных: 0:00:00.004562
+2022-12-13T00:16:51.632465+0300 | INFO | <reviews>. Добавлено документов 1 из 1
+2022-12-13T00:16:51.632640+0300 | INFO | <reviews>. Время загрузки данных: 0:00:00.002922
+2022-12-13T00:16:51.642910+0300 | INFO | <reviews_likes>. Добавлено документов 1 из 1
+2022-12-13T00:16:51.643274+0300 | INFO | <reviews_likes>. Время загрузки данных: 0:00:00.010062
+2022-12-13T00:16:51.647189+0300 | INFO | <bookmarks>. Добавлено документов 1 из 1
+2022-12-13T00:16:51.647387+0300 | INFO | <bookmarks>. Время загрузки данных: 0:00:00.003555
+2022-12-13T00:16:51.650865+0300 | INFO | Command movies.likes.find_filter(particular document: user_id, film_id) start at 2022-12-13 00:16:51.649792 execute for 0:00:00.001055
+2022-12-13T00:16:51.860177+0300 | INFO | Command movies.likes.find_filter(user's likes in a day) start at 2022-12-13 00:16:51.651011 execute for 0:00:00.209144
+2022-12-13T00:16:51.862294+0300 | INFO | Command movies.reviews.find_filter(particular reviews: user_id, film_id) start at 2022-12-13 00:16:51.860329 execute for 0:00:00.001945
+2022-12-13T00:16:51.873535+0300 | INFO | Command movies.reviews.find_filter(all film's reviews) start at 2022-12-13 00:16:51.862446 execute for 0:00:00.011066
+2022-12-13T00:16:51.874806+0300 | INFO | Command movies.bookmarks.find_filter(particular bookmark: user_id, film_id) start at 2022-12-13 00:16:51.873701 execute for 0:00:00.001089
+2022-12-13T00:16:51.876385+0300 | INFO | Command movies.bookmarks.find_filter(all user's bookmarks) start at 2022-12-13 00:16:51.874938 execute for 0:00:00.001429
+2022-12-13T00:16:52.574941+0300 | INFO | Command movies.likes.aggregate(average film's rating) start at 2022-12-13 00:16:51.876522 execute for 0:00:00.698393
+2022-12-13T00:16:52.576365+0300 | INFO | Command movies.likes.update(particular document: user_id, film_id set rating) start at 2022-12-13 00:16:52.575109 execute for 0:00:00.001240. Result count <1>.
+2022-12-13T00:16:52.577534+0300 | INFO | Command movies.likes.count(film's like before insert) start at 2022-12-13 00:16:52.576502 execute for 0:00:00.001017. Result count <19>.
+2022-12-13T00:16:52.580234+0300 | INFO | Command movies.likes.insert start at 2022-12-13 00:16:52.577653 execute for 0:00:00.002554. Result count <1>.
+2022-12-13T00:16:52.581553+0300 | INFO | Command movies.likes.count(film's like after insert) start at 2022-12-13 00:16:52.580397 execute for 0:00:00.001130. Result count <20>.
+2022-12-13T00:16:52.603851+0300 | INFO | Command movies.likes.delete(particular document: _id) start at 2022-12-13 00:16:52.581692 execute for 0:00:00.022098. Result count <1>.
+2022-12-13T11:19:53.142470+0300 | INFO | <likes>. Добавлено документов 1 из 1
+2022-12-13T11:19:53.142953+0300 | INFO | <likes>. Время загрузки данных: 0:00:00.031877
+2022-12-13T11:19:53.165557+0300 | INFO | <reviews>. Добавлено документов 1 из 1
+2022-12-13T11:19:53.165809+0300 | INFO | <reviews>. Время загрузки данных: 0:00:00.022088
+2022-12-13T11:19:53.177642+0300 | INFO | <reviews_likes>. Добавлено документов 1 из 1
+2022-12-13T11:19:53.177825+0300 | INFO | <reviews_likes>. Время загрузки данных: 0:00:00.011534
+2022-12-13T11:19:53.193570+0300 | INFO | <bookmarks>. Добавлено документов 1 из 1
+2022-12-13T11:19:53.193740+0300 | INFO | <bookmarks>. Время загрузки данных: 0:00:00.015560
+2022-12-13T11:19:53.197463+0300 | INFO | Command movies.likes.find_filter(particular document: user_id, film_id) start at 2022-12-13 11:19:53.195819 execute for 0:00:00.001615
+2022-12-13T11:19:53.641122+0300 | INFO | Command movies.likes.find_filter(user's likes in a day) start at 2022-12-13 11:19:53.197658 execute for 0:00:00.443441
+2022-12-13T11:19:53.642813+0300 | INFO | Command movies.reviews.find_filter(particular reviews: user_id, film_id) start at 2022-12-13 11:19:53.641304 execute for 0:00:00.001490
+2022-12-13T11:19:53.661859+0300 | INFO | Command movies.reviews.find_filter(all film's reviews) start at 2022-12-13 11:19:53.642995 execute for 0:00:00.018839
+2022-12-13T11:19:53.663377+0300 | INFO | Command movies.bookmarks.find_filter(particular bookmark: user_id, film_id) start at 2022-12-13 11:19:53.662025 execute for 0:00:00.001334
+2022-12-13T11:19:53.681517+0300 | INFO | Command movies.bookmarks.find_filter(all user's bookmarks) start at 2022-12-13 11:19:53.663516 execute for 0:00:00.017962
+2022-12-13T11:19:54.389922+0300 | INFO | Command movies.likes.aggregate(average film's rating) start at 2022-12-13 11:19:53.681826 execute for 0:00:00.708067
+2022-12-13T11:19:54.391735+0300 | INFO | Command movies.likes.update(particular document: user_id, film_id set rating) start at 2022-12-13 11:19:54.390140 execute for 0:00:00.001570. Result count <1>.
+2022-12-13T11:19:54.393645+0300 | INFO | Command movies.likes.count(film's like before insert) start at 2022-12-13 11:19:54.391918 execute for 0:00:00.001703. Result count <19>.
+2022-12-13T11:19:54.397876+0300 | INFO | Command movies.likes.insert start at 2022-12-13 11:19:54.393815 execute for 0:00:00.004031. Result count <1>.
+2022-12-13T11:19:54.399611+0300 | INFO | Command movies.likes.count(film's like after insert) start at 2022-12-13 11:19:54.398142 execute for 0:00:00.001452. Result count <20>.
+2022-12-13T11:19:54.402518+0300 | INFO | Command movies.likes.delete(particular document: _id) start at 2022-12-13 11:19:54.399746 execute for 0:00:00.002747. Result count <1>.
+2022-12-13T11:20:40.222814+0300 | INFO | <likes>. Добавлено документов 1 из 10
+2022-12-13T11:20:40.227630+0300 | INFO | <likes>. Добавлено документов 2 из 10
+2022-12-13T11:20:40.234794+0300 | INFO | <likes>. Добавлено документов 3 из 10
+2022-12-13T11:20:40.239360+0300 | INFO | <likes>. Добавлено документов 4 из 10
+2022-12-13T11:20:40.243534+0300 | INFO | <likes>. Добавлено документов 5 из 10
+2022-12-13T11:20:40.248239+0300 | INFO | <likes>. Добавлено документов 6 из 10
+2022-12-13T11:20:40.252387+0300 | INFO | <likes>. Добавлено документов 7 из 10
+2022-12-13T11:20:40.256981+0300 | INFO | <likes>. Добавлено документов 8 из 10
+2022-12-13T11:20:40.260552+0300 | INFO | <likes>. Добавлено документов 9 из 10
+2022-12-13T11:20:40.263784+0300 | INFO | <likes>. Добавлено документов 10 из 10
+2022-12-13T11:20:40.264006+0300 | INFO | <likes>. Время загрузки данных: 0:00:00.056421
+2022-12-13T11:20:40.269347+0300 | INFO | <reviews>. Добавлено документов 1 из 10
+2022-12-13T11:20:40.273444+0300 | INFO | <reviews>. Добавлено документов 2 из 10
+2022-12-13T11:20:40.277075+0300 | INFO | <reviews>. Добавлено документов 3 из 10
+2022-12-13T11:20:40.281444+0300 | INFO | <reviews>. Добавлено документов 4 из 10
+2022-12-13T11:20:40.284809+0300 | INFO | <reviews>. Добавлено документов 5 из 10
+2022-12-13T11:20:40.288122+0300 | INFO | <reviews>. Добавлено документов 6 из 10
+2022-12-13T11:20:40.291272+0300 | INFO | <reviews>. Добавлено документов 7 из 10
+2022-12-13T11:20:40.294671+0300 | INFO | <reviews>. Добавлено документов 8 из 10
+2022-12-13T11:20:40.297987+0300 | INFO | <reviews>. Добавлено документов 9 из 10
+2022-12-13T11:20:40.301600+0300 | INFO | <reviews>. Добавлено документов 10 из 10
+2022-12-13T11:20:40.301783+0300 | INFO | <reviews>. Время загрузки данных: 0:00:00.032616
+2022-12-13T11:20:40.306573+0300 | INFO | <reviews_likes>. Добавлено документов 1 из 10
+2022-12-13T11:20:40.310261+0300 | INFO | <reviews_likes>. Добавлено документов 2 из 10
+2022-12-13T11:20:40.313736+0300 | INFO | <reviews_likes>. Добавлено документов 3 из 10
+2022-12-13T11:20:40.316975+0300 | INFO | <reviews_likes>. Добавлено документов 4 из 10
+2022-12-13T11:20:40.320111+0300 | INFO | <reviews_likes>. Добавлено документов 5 из 10
+2022-12-13T11:20:40.323490+0300 | INFO | <reviews_likes>. Добавлено документов 6 из 10
+2022-12-13T11:20:40.326974+0300 | INFO | <reviews_likes>. Добавлено документов 7 из 10
+2022-12-13T11:20:40.330203+0300 | INFO | <reviews_likes>. Добавлено документов 8 из 10
+2022-12-13T11:20:40.333717+0300 | INFO | <reviews_likes>. Добавлено документов 9 из 10
+2022-12-13T11:20:40.337249+0300 | INFO | <reviews_likes>. Добавлено документов 10 из 10
+2022-12-13T11:20:40.337436+0300 | INFO | <reviews_likes>. Время загрузки данных: 0:00:00.031608
+2022-12-13T11:20:40.343979+0300 | INFO | <bookmarks>. Добавлено документов 1 из 10
+2022-12-13T11:20:40.346992+0300 | INFO | <bookmarks>. Добавлено документов 2 из 10
+2022-12-13T11:20:40.350194+0300 | INFO | <bookmarks>. Добавлено документов 3 из 10
+2022-12-13T11:20:40.353513+0300 | INFO | <bookmarks>. Добавлено документов 4 из 10
+2022-12-13T11:20:40.356893+0300 | INFO | <bookmarks>. Добавлено документов 5 из 10
+2022-12-13T11:20:40.360033+0300 | INFO | <bookmarks>. Добавлено документов 6 из 10
+2022-12-13T11:20:40.363703+0300 | INFO | <bookmarks>. Добавлено документов 7 из 10
+2022-12-13T11:20:40.367217+0300 | INFO | <bookmarks>. Добавлено документов 8 из 10
+2022-12-13T11:20:40.371711+0300 | INFO | <bookmarks>. Добавлено документов 9 из 10
+2022-12-13T11:20:40.375108+0300 | INFO | <bookmarks>. Добавлено документов 10 из 10
+2022-12-13T11:20:40.375286+0300 | INFO | <bookmarks>. Время загрузки данных: 0:00:00.031513
+2022-12-13T11:59:28.344133+0300 | INFO | Command movies.likes.create start at 2022-12-13 11:59:28.341605 execute for 0:00:00.002506
+2022-12-13T11:59:28.374782+0300 | INFO | Command admin.likes.shardCollection start at 2022-12-13 11:59:28.344300 execute for 0:00:00.030452
+2022-12-13T11:59:28.376653+0300 | INFO | Command movies.reviews.create start at 2022-12-13 11:59:28.375026 execute for 0:00:00.001609
+2022-12-13T11:59:28.405410+0300 | INFO | Command admin.reviews.shardCollection start at 2022-12-13 11:59:28.376809 execute for 0:00:00.028576
+2022-12-13T11:59:28.408860+0300 | INFO | Command movies.reviews_likes.create start at 2022-12-13 11:59:28.405631 execute for 0:00:00.003200
+2022-12-13T11:59:28.433464+0300 | INFO | Command admin.reviews_likes.shardCollection start at 2022-12-13 11:59:28.409099 execute for 0:00:00.024336
+2022-12-13T11:59:28.435575+0300 | INFO | Command movies.bookmarks.create start at 2022-12-13 11:59:28.433669 execute for 0:00:00.001880
+2022-12-13T11:59:28.464153+0300 | INFO | Command admin.bookmarks.shardCollection start at 2022-12-13 11:59:28.435760 execute for 0:00:00.028347
