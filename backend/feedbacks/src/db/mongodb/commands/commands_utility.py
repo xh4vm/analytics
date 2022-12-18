@@ -2,10 +2,10 @@ import json
 from collections import OrderedDict
 from pathlib import Path
 
-from core.config import SETTINGS
-from db.mongodb.mongodb import AsyncMongoDB
 from loguru import logger
-from utility.utility import DateEncoder, datetime_parser
+from src.core.config import SETTINGS
+from src.db.mongodb.mongodb import AsyncMongoDB
+from src.utility.utility import DateEncoder, datetime_parser
 
 
 async def perform_command_from_json_file(

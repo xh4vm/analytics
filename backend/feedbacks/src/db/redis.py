@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 from functools import wraps
 
 from aioredis import Redis
-from api.v1.utilitys import test_connection
-from models.base import get_obj, get_str
+from src.api.v1.utilitys import test_connection
+from src.models.base import get_obj, get_str
 
 
 class AsyncCacheStorage(ABC):

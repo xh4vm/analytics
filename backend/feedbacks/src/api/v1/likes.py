@@ -35,6 +35,7 @@ async def get_number_films_likes(
     Arguments:
         request: request
         film_id: ID of film
+        current_user_id:
         obj_service: service object
 
     Returns:

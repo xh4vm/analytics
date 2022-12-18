@@ -2,11 +2,11 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from http import HTTPStatus
 
-from core.config import SETTINGS
-from core.settings import Messages
-from db.mongodb.mongodb import AsyncMongoDB
-from db.redis import AsyncCacheStorage
 from pymongo.errors import DuplicateKeyError
+from src.core.config import SETTINGS
+from src.core.settings import Messages
+from src.db.mongodb.mongodb import AsyncMongoDB
+from src.db.redis import AsyncCacheStorage
 
 
 class BaseSearchService(ABC):

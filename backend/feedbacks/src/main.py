@@ -4,7 +4,7 @@ import logging
 
 import aioredis
 import uvicorn as uvicorn
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request
 from fastapi.responses import ORJSONResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 from src.api.v1 import bookmarks, likes, reviews
@@ -45,11 +45,6 @@ async def shutdown():
     """ Execute close connects to databases on event shutdown. """
     await redis.cash.close()
     mdb.cl.close()
-
-
-@app.get("/")
-async def root():
-    return Response(SETTINGS.NAME)
 
 
 app.include_router(likes.router, prefix='/api/v1/likes')

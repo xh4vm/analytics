@@ -2,13 +2,13 @@ import argparse
 import asyncio
 from pathlib import Path
 
-from core.config import SETTINGS
-from core.settings import ROOT_DIR
-# from adapters.mongo.client import database_client
-from db.mongodb.commands.commands_utility import perform_command_from_json_file
-from db.mongodb.mongodb import mdb
 from loguru import logger
 from motor.motor_asyncio import AsyncIOMotorClient
+from src.core.config import SETTINGS
+from src.core.settings import ROOT_DIR
+from src.db.mongodb.commands.commands_utility import \
+    perform_command_from_json_file
+from src.db.mongodb.mongodb import mdb
 
 
 class ArgumentsSetter:
