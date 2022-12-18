@@ -12,7 +12,7 @@ from src.services.review import Review, ReviewService, get_review_service
 
 router = APIRouter()
 URL = f'{SETTINGS.FEEDBACKS_API_HOST}:{SETTINGS.FEEDBACKS_API_PORT}\
-{SETTINGS.FEEDBACKS_API_PATH}/{SETTINGS.FEEDBACKS_API_VERSION}/likes'
+{SETTINGS.FEEDBACKS_API_PATH}/{SETTINGS.FEEDBACKS_API_VERSION}/reviews'
 
 
 @router.get(
@@ -38,6 +38,7 @@ async def get_reviews_list(
         params:
         filters:
         filters_likes:
+        current_user_id
         obj_service: service object
 
     Returns:
@@ -74,6 +75,7 @@ async def create_review(
         request: request
         params:
         text_review:
+        current_user_id:
         obj_service: service object
 
     Returns:
@@ -106,6 +108,7 @@ async def update_review(
         request: request
         params:
         text_review:
+        current_user_id:
         obj_service: service object
 
     Returns:
@@ -136,6 +139,7 @@ async def delete_review(
     Arguments:
         request: request
         params:
+        current_user_id:
         obj_service: service object
 
     Returns:
@@ -168,6 +172,7 @@ async def create_review_like(
         request: request
         params:
         rating:
+        current_user_id:
         obj_service: service object
 
     Returns:

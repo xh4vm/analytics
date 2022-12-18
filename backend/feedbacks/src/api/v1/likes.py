@@ -67,6 +67,7 @@ async def get_films_avg_rating(
     Arguments:
         request: request
         film_id: ID of film
+        current_user_id:
         obj_service: service object
 
     Returns:
@@ -97,7 +98,7 @@ async def create_like(
 
     Arguments:
         request: request
-        account_id:
+        current_user_id:
         params:
         rating:
         obj_service: service object
@@ -132,6 +133,7 @@ async def update_like(
         request: request
         params:
         rating:
+        current_user_id:
         obj_service: service object
 
     Returns:
@@ -162,6 +164,7 @@ async def delete_like(
     Arguments:
         request: request
         params:
+        current_user_id:
         obj_service: service object
 
     Returns:

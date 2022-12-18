@@ -355,6 +355,8 @@ services:
       - analytics
     expose:
       - ${PROJECT_FEEDBACKS_API_PORT}
+    volumes:
+      - ./backend/feedbacks:/opt/content
     healthcheck:
       test: curl http://feedbacks-api:${PROJECT_FEEDBACKS_API_PORT} >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
       interval: 3s

@@ -47,6 +47,6 @@ def get_like_service(
         LikeService: like service
     """
 
-    messages.src.list_empty = messages.list_empty.format('likes')
+    messages.list_empty = messages.list_empty.format('likes')
 
     return LikeService(cache, db_storage_source, messages)
