@@ -1,0 +1,165 @@
+{
+  "db_data.likes.create":{
+    "create": "likes",
+    "clusteredIndex": { "key": { "_id": 1 }, "unique": true, "name": "likes clustered key" },
+    "validator": {
+        "$jsonSchema": {
+          "bsonType": "object",
+          "required": [
+            "user_id",
+            "film_id",
+            "rating",
+            "created",
+            "modified"
+          ],
+          "properties": {
+            "user_id": {
+              "bsonType": "string",
+              "description": "User's UUID"
+            },
+            "film_id": {
+              "bsonType": "string",
+              "description": "Film's id"
+            },
+            "rating": {
+              "bsonType": "int",
+              "description": "Rating"
+            },
+            "created": {
+              "bsonType": "date",
+              "description": "Date of creation of the like"
+            },
+            "modified": {
+              "bsonType": "date",
+              "description": "Date of modification of the like"
+            }
+          }
+        }
+    }
+  },
+  "db_admin.likes.shardCollection":{
+    "shardCollection": "movies.likes",
+    "key": { "film_id": "hashed"}
+  },
+  "db_data.reviews.create":{
+    "create": "reviews",
+    "clusteredIndex": { "key": { "_id": 1 }, "unique": true, "name": "reviews clustered key" },
+    "validator": {
+      "$jsonSchema": {
+        "bsonType": "object",
+        "required": [
+          "user_id",
+          "film_id",
+          "text",
+          "created",
+          "modified"
+        ],
+        "properties": {
+          "user_id": {
+            "bsonType": "string",
+            "description": "User's UUID"
+          },
+          "film_id": {
+            "bsonType": "string",
+            "description": "Film's id"
+          },
+          "text": {
+            "bsonType": "string",
+            "description": "Text of review"
+          },
+          "created": {
+            "bsonType": "date",
+            "description": "Date of creation of the review"
+          },
+          "modified": {
+            "bsonType": "date",
+            "description": "Date of modification of the review"
+          }
+        }
+      }
+    }
+  },
+  "db_admin.reviews.shardCollection":{
+    "shardCollection": "movies.reviews",
+    "key": { "film_id": "hashed"}
+  },
+  "db_data.reviews_likes.create":{
+    "create": "reviews_likes",
+    "clusteredIndex": { "key": { "_id": 1 }, "unique": true, "name": "reviews clustered key" },
+    "validator": {
+      "$jsonSchema": {
+        "bsonType": "object",
+        "required": [
+          "review_id",
+          "user_id",
+          "rating",
+          "created",
+          "modified"
+        ],
+        "properties": {
+          "review_id": {
+            "bsonType": "objectId",
+            "description": "Review's UUID"
+          },
+          "user_id": {
+            "bsonType": "string",
+            "description": "User's id"
+          },
+          "rating": {
+            "bsonType": "int",
+            "description": "Rating of review"
+          },
+          "created": {
+            "bsonType": "date",
+            "description": "Date of creation of the review's like"
+          },
+          "modified": {
+            "bsonType": "date",
+            "description": "Date of modification of the review's like"
+          }
+        }
+      }
+    }
+  },
+  "db_admin.reviews_likes.shardCollection":{
+    "shardCollection": "movies.reviews_likes",
+    "key": { "review_id": "hashed"}
+  },
+  "db_data.bookmarks.create":{
+    "create": "bookmarks",
+    "clusteredIndex": { "key": { "_id": 1 }, "unique": true, "name": "reviews clustered key" },
+    "validator": {
+      "$jsonSchema": {
+        "bsonType": "object",
+        "required": [
+          "user_id",
+          "film_id",
+          "created",
+          "modified"
+        ],
+        "properties": {
+          "user_id": {
+            "bsonType": "string",
+            "description": "User's UUID"
+          },
+          "film_id": {
+            "bsonType": "string",
+            "description": "Film's id"
+          },
+          "created": {
+            "bsonType": "date",
+            "description": "Date of creation of the bookmark"
+          },
+          "modified": {
+            "bsonType": "date",
+            "description": "Date of modification of the bookmark"
+          }
+        }
+      }
+    }
+  },
+  "db_admin.bookmarks.shardCollection":{
+    "shardCollection": "movies.bookmarks",
+    "key": { "film_id": "hashed"}
+  }
+}

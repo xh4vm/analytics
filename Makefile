@@ -73,7 +73,7 @@ mongo: run_containers
 .PHONY: interactive build mongo cluster
 mongo_cfg: config_cluster
 
-.PHONY: run docker containers
+.PHONY: run docker mongodb containers
 run_containers:
 	$(call log,Run containers)
 	docker-compose --profile mongo up
@@ -122,6 +122,17 @@ load_data:
 .PHONY: get benchmarks results
 test_data:
 	python db_research/mongo/src/benchmarks.py
+
+.PHONY: run feedbacks dev
+run_dev: run_feedbacks_dev
+
+.PHONY: run feedbacks dev docker containers
+run_feedbacks_dev:
+	docker-compose --profile feedbacks-dev up
+
+.PHONY: run feedbacks docker containers
+run_feedbacks:
+	docker-compose --profile feedbacks up --build
 
 .PHONY: run pre-commit all files
 pre-commit-files:

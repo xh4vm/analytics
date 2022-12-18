@@ -36,7 +36,6 @@ x-base-logstash: &base_logstash
   expose:
     - ${LOGSTASH_PORT}
 
-
 services:
 
   nginx:
@@ -57,11 +56,14 @@ services:
       - ./backend/nginx/static/log/error_log:/var/log/nginx/error.log:rw
     ports:
       - ${KIBANA_PORT}:${KIBANA_PORT}
+      - ${PROJECT_FEEDBACKS_API_PORT}:${PROJECT_FEEDBACKS_API_PORT}
 
   redis:
     <<: *base_redis
     profiles:
       - analytics
+      - feedbacks
+      - feedbacks-dev
     volumes:
       - redis-data:/data
 
@@ -169,13 +171,11 @@ services:
     container_name: mongors1n1
     image: mongo
     command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
-    ports:
-      - 27017:27017
     expose:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/data1:/data/db
+      - /tmp/mongo_cluster1/data1:/data/db
     profiles: 
       - analytics
       - mongo
@@ -185,13 +185,11 @@ services:
     container_name: mongors1n2
     image: mongo
     command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
-    ports:
-      - 27027:27017
     expose:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/data2:/data/db
+      - /tmp/mongo_cluster1/data2:/data/db
     profiles: 
       - analytics
       - mongo
@@ -201,13 +199,11 @@ services:
     container_name: mongors1n3
     image: mongo
     command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
-    ports:
-      - 27037:27017
     expose:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/data3:/data/db
+      - /tmp/mongo_cluster1/data3:/data/db
     profiles: 
       - analytics
       - mongo
@@ -217,13 +213,11 @@ services:
     container_name: mongors2n1
     image: mongo
     command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
-    ports:
-      - 27047:27017
     expose:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/data4:/data/db
+      - /tmp/mongo_cluster1/data4:/data/db
     profiles: 
       - analytics
       - mongo
@@ -233,13 +227,11 @@ services:
     container_name: mongors2n2
     image: mongo
     command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
-    ports:
-      - 27057:27017
     expose:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/data5:/data/db
+      - /tmp/mongo_cluster1/data5:/data/db
     profiles: 
       - analytics
       - mongo
@@ -249,13 +241,11 @@ services:
     container_name: mongors2n3
     image: mongo
     command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
-    ports:
-      - 27067:27017
     expose:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/data6:/data/db
+      - /tmp/mongo_cluster1/data6:/data/db
     profiles: 
       - analytics
       - mongo
@@ -269,7 +259,7 @@ services:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/config1:/data/db
+      - /tmp/mongo_cluster1/config1:/data/db
     profiles: 
       - analytics
       - mongo
@@ -283,7 +273,7 @@ services:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/config2:/data/db
+      - /tmp/mongo_cluster1/config2:/data/db
     profiles: 
       - analytics
       - mongo
@@ -297,7 +287,7 @@ services:
       - "27017"
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /tmp/mongo_cluster/config3:/data/db
+      - /tmp/mongo_cluster1/config3:/data/db
     profiles: 
       - analytics
       - mongo
@@ -311,9 +301,7 @@ services:
       - mongocfg1
       - mongocfg2
       - mongocfg3
-    command: mongos --configdb mongors1conf/mongocfg1:27017,mongocfg2:27017,mongocfg3:27017 --port 27017 --bind_ip 0.0.0.0
-    ports:
-      - 27019:27017
+    command: mongos --configdb mongors1conf/mongocfg1:27017,mongocfg2:27017,mongocfg3:27017 --port 27017 --bind_ip_all
     expose:
       - "27017"
     volumes:
@@ -331,9 +319,7 @@ services:
       - mongocfg1
       - mongocfg2
       - mongocfg3
-    command: mongos --configdb mongors1conf/mongocfg1:27017,mongocfg2:27017,mongocfg3:27017 --port 27017 --bind_ip 0.0.0.0
-    ports:
-      - 27020:27017
+    command: mongos --configdb mongors1conf/mongocfg1:27017,mongocfg2:27017,mongocfg3:27017 --port 27017 --bind_ip_all
     expose:
       - "27017"
     volumes:
@@ -342,6 +328,18 @@ services:
       - analytics
       - mongo
 
+  feedbacks-api:
+    <<: *base_service
+    build: ./backend/feedbacks
+    container_name: feedbacks-api
+    env_file: .env
+    profiles:
+      - feedbacks
+      - analytics
+    expose:
+      - ${PROJECT_FEEDBACKS_API_PORT}
+    depends_on:
+      - redis
 
 networks:
   analytics:
