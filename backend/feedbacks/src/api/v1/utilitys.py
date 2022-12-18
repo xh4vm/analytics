@@ -4,7 +4,7 @@ from http import HTTPStatus
 import backoff
 from aiohttp.client_exceptions import ClientConnectorError
 from aioredis.exceptions import ConnectionError
-from core.config import SETTINGS
+from src.core.config import SETTINGS
 from fastapi import HTTPException
 
 

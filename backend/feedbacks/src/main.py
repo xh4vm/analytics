@@ -4,11 +4,11 @@ import logging
 
 import aioredis
 import uvicorn as uvicorn
-from api.v1 import bookmarks, likes, reviews
-from core.config import SETTINGS
-from core.logger import LOGGING
-from db.mongodb.mongodb import mdb
-from db.redis import redis
+from src.api.v1 import bookmarks, likes, reviews
+from src.core.config import SETTINGS
+from src.core.logger import LOGGING
+from src.db.mongodb.mongodb import mdb
+from src.db.redis import redis
 from fastapi import FastAPI
 # from fastapi import Request
 from fastapi.responses import ORJSONResponse
