@@ -1,8 +1,12 @@
 import logging
+from pathlib import Path
 from typing import Any
 
 import backoff
 from pydantic import BaseSettings, Field
+
+BASE_DIR = Path(__file__).resolve().parent
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
 
 
 class AuthSettings(BaseSettings):
@@ -14,6 +18,7 @@ class AuthSettings(BaseSettings):
 
     class Config:
         env_prefix = 'AUTH_'
+        env_file = Path(ROOT_DIR, '.env')
 
 
 class GRPCSettings(BaseSettings):
@@ -22,6 +27,7 @@ class GRPCSettings(BaseSettings):
 
     class Config:
         env_prefix = 'AUTH_GRPC_'
+        env_file = Path(ROOT_DIR, '.env')
 
 
 class Config(BaseSettings):

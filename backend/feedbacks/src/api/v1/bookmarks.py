@@ -64,6 +64,7 @@ async def create_bookmark(
     Arguments:
         request: request
         params:
+        current_user_id:
         obj_service: service object
 
     Returns:
@@ -94,6 +95,7 @@ async def delete_bookmark(
     Arguments:
         request: request
         params:
+        current_user_id:
         obj_service: service object
 
     Returns:

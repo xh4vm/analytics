@@ -346,10 +346,10 @@ services:
     depends_on:
       - redis
 
-  nginx:
+  nginx-api:
     <<: *base_service
     image: nginx:1.23.1-alpine
-    container_name: nginx
+    container_name: nginx-api
     profiles:
       - feedbacks
     volumes:

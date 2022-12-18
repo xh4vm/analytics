@@ -1,15 +1,14 @@
 """ Router for Likes service. """
 
 from fastapi import APIRouter, Depends, Request
+from modules.auth.src.payloads.fastapi import UserAccessRequired
 from pydantic.types import UUID4
 from src.api.v1.params import FilmUserIDsParams, RatingParams
 from src.api.v1.utilitys import check_result
 from src.core.config import SETTINGS
 from src.db.redis import use_cache
-from src.models.like import FilmsLikes
-from src.modules.auth.src.payloads.fastapi import UserAccessRequired
-from src.services.like import (FilmsAvgRating, Like, LikeService,
-                               get_like_service)
+from src.models.like import FilmsAvgRating, FilmsLikes, Like
+from src.services.like import LikeService, get_like_service
 
 router = APIRouter()
 URL = f'{SETTINGS.FEEDBACKS_API_HOST}:{SETTINGS.FEEDBACKS_API_PORT}\
