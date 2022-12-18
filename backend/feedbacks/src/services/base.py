@@ -6,7 +6,6 @@ from core.config import SETTINGS
 from core.settings import Messages
 from db.mongodb.mongodb import AsyncMongoDB
 from db.redis import AsyncCacheStorage
-from models.base import ResponseMDB
 from pymongo.errors import DuplicateKeyError
 
 
@@ -64,12 +63,9 @@ class MongoDBService(BaseSearchService):
 
     async def delete_doc(self, params: dict, **kwargs):
 
-        result = await self.data_source.delete_one(self.model.Config.collection, params)
+        delete_review = await self.data_source.delete_one(self.model.Config.collection, params)
 
-        if result.acknowledged and result.deleted_count == 0:
-            return None
-
-        return ResponseMDB(result=result.acknowledged)
+        return delete_review
 
     async def get_doc_avg_rating(self, data: dict):
         match = {'$match': data}

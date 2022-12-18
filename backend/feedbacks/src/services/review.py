@@ -88,6 +88,21 @@ class ReviewService(MongoDBService):
         )
         return result
 
+    async def delete_review(self, params: dict, **kwargs):
+        current_model = kwargs.get('model') or self.model
+        deleted_review = await self.delete_doc(params)
+
+        if not deleted_review:
+            return None
+
+        result = await self.data_source.delete_many(
+            self.model.Config.collection_likes,
+            {'review_id': deleted_review['_id']}
+        )
+        deleted_likes_count = result.deleted_count if result.acknowledged else None
+
+        return current_model(**deleted_review, deleted_likes_count=deleted_likes_count)
+
 
 @lru_cache()
 def get_review_service(

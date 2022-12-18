@@ -5,8 +5,7 @@ from api.v1.params import (CustomQueryParams, CustomReviewsLikesParams,
                            RatingParams, ReviewUserIDsParams)
 from api.v1.utilitys import check_result
 from fastapi import APIRouter, Body, Depends, Request
-from models.base import ResponseMDB
-from models.review import ReviewFull, ReviewLike
+from models.review import ReviewAvgRating, ReviewDeleteLikes, ReviewLike
 from services.review import Review, ReviewService, get_review_service
 
 router = APIRouter()
@@ -14,7 +13,7 @@ router = APIRouter()
 
 @router.get(
     '',
-    response_model=list[ReviewFull],
+    response_model=list[ReviewAvgRating],
     summary='Get list of films reviews.',
     description='Get list of films reviews.',
     response_description='Get list of films reviews.',
@@ -26,7 +25,7 @@ async def get_reviews_list(
         filters: CustomReviewsParams = Depends(),
         filters_likes: CustomReviewsLikesParams = Depends(),
         obj_service: ReviewService = Depends(get_review_service),
-) -> [ReviewFull]:
+) -> [ReviewAvgRating]:
     """ Create a film review.
 
     Arguments:
@@ -37,7 +36,7 @@ async def get_reviews_list(
         obj_service: service object
 
     Returns:
-        list[ReviewFull]: user's list of film's review
+        list[ReviewAvgRating]: user's list of film's review
     """
     reviews = await obj_service.get_reviews_list(
         params=params,
@@ -113,7 +112,7 @@ async def update_review(
 
 @router.delete(
     '/review',
-    response_model=ResponseMDB,
+    response_model=ReviewDeleteLikes,
     summary='Delete a film review.',
     description='Delete a film review.',
     response_description='Delete a film review.',
@@ -123,7 +122,7 @@ async def delete_review(
         request: Request,
         params: FilmUserIDsParams = Depends(),
         obj_service: ReviewService = Depends(get_review_service),
-) -> ResponseMDB:
+) -> ReviewDeleteLikes:
     """ Delete a film review.
 
     Arguments:
@@ -132,9 +131,9 @@ async def delete_review(
         obj_service: service object
 
     Returns:
-        ResponseMDB: respond
+        ReviewDeleteLikes: respond
     """
-    result = await obj_service.delete_doc(params.get_dict())
+    result = await obj_service.delete_review(params.get_dict(), model=ReviewDeleteLikes)
     await check_result(result, obj_service.errors, obj_service.messages.list_empty)
 
     return result

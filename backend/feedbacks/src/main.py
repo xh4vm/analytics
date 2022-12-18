@@ -9,8 +9,7 @@ from core.config import SETTINGS
 from core.logger import LOGGING
 from db.mongodb.mongodb import mdb
 from db.redis import redis
-from fastapi import FastAPI
-# from fastapi import Request
+from fastapi import FastAPI, Request, Response
 from fastapi.responses import ORJSONResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -24,12 +23,12 @@ app = FastAPI(
 )
 
 
-# @app.middleware("http")
-# async def add_process_time_header(request: Request, call_next):
-#     request_id = request.headers.get('X-Request-Id')
-#     if not request_id:
-#         raise RuntimeError('request id is required')
-#     return await call_next(request)
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    request_id = request.headers.get('X-Request-Id')
+    if not request_id:
+        raise RuntimeError('request id is required')
+    return await call_next(request)
 
 
 @app.on_event('startup')
@@ -46,6 +45,11 @@ async def shutdown():
     """ Execute close connects to databases on event shutdown. """
     await redis.cash.close()
     mdb.cl.close()
+
+
+@app.get("/")
+async def root():
+    return Response(SETTINGS.NAME)
 
 
 app.include_router(likes.router, prefix='/api/v1/likes')

@@ -47,7 +47,13 @@ class ReviewLike(BaseMixin, DateMixin):
         return str(v)
 
 
-class ReviewFull(Review):
+class ReviewAvgRating(Review):
     """ Class for Film review model with average. """
 
     avg_rating: float = None
+
+
+class ReviewDeleteLikes(Review):
+    """ Class for Film review model with deleted likes count. """
+
+    deleted_likes_count: int = None

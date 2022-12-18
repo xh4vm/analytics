@@ -175,6 +175,11 @@ services:
       - feedbacks
     expose:
       - ${PROJECT_FEEDBACKS_API_PORT}
+    healthcheck:
+      test: curl --fail -H "X-Request-Id:123456" http://feedbacks-api:${PROJECT_FEEDBACKS_API_PORT} || exit 1
+      interval: 3s
+      timeout: 10s
+      retries: 5
     depends_on:
       - redis
 
@@ -191,7 +196,8 @@ services:
       - ./backend/nginx/static/log/access_log:/var/log/nginx/access.log:rw
       - ./backend/nginx/static/log/error_log:/var/log/nginx/error.log:rw
     depends_on:
-      - feedbacks-api
+      feedbacks-api:
+        condition: service_healthy
     ports:
       - ${PROJECT_FEEDBACKS_API_PORT}:${PROJECT_FEEDBACKS_API_PORT}
 

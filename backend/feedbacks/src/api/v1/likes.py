@@ -4,7 +4,6 @@ from api.v1.params import FilmUserIDsParams, RatingParams
 from api.v1.utilitys import check_result
 from db.redis import use_cache
 from fastapi import APIRouter, Depends, Request
-from models.base import ResponseMDB
 from models.like import FilmsLikes
 from pydantic.types import UUID4
 from services.like import FilmsAvgRating, Like, LikeService, get_like_service
@@ -137,7 +136,7 @@ async def update_like(
 
 @router.delete(
     '/like',
-    response_model=ResponseMDB,
+    response_model=Like,
     summary='Delete user\'s like of films.',
     description='Delete user\'s like of films.',
     response_description='Delete user\'s like of films.',
@@ -147,7 +146,7 @@ async def delete_like(
         request: Request,
         params: FilmUserIDsParams = Depends(),
         obj_service: LikeService = Depends(get_like_service),
-) -> ResponseMDB:
+) -> Like:
     """ 'Delete user\'s like of films.'.
 
     Arguments:
@@ -156,7 +155,7 @@ async def delete_like(
         obj_service: service object
 
     Returns:
-        ResponseMDB: respond
+        Like: respond
     """
     result = await obj_service.delete_doc(params.get_dict())
     await check_result(result, obj_service.errors, obj_service.messages.list_empty)

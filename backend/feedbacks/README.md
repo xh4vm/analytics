@@ -11,19 +11,17 @@
 3. Хранилище данных MongoDB
 4. Кэширование на базе данных Redis
 
-## Сервис зависит от:
-1. Admin Panel на  Django - первичный ввод информации в базу данных Postgresql
-2. ETL сервис загрузка и обновление данных из базы данных Postgresql в поисковике Elasticsearch.
-3. AuthAPI сервис - аутентификация пользователей согласно их ролям доступа
-
 
 ## Get Start
 <hr/>
-Предварительные настройки
+
+1. Переименовать файл .env.example в .env <br>
+2. Запустить контейнеры: `make mongo`
+3. Настроить кластер: `make mongo_cfg`
+4. Запустить проект: `make run_feedbacks`
 
 После запуска 
-  - сервис доступен по адресу: [http://localhost:8001/api/v1](http://localhost:8001/api/openapi)
-  - документация к сервису по адресу: [http://localhost:8001/api/openapi](http://localhost:8001/api/openapi)
-  <br>Для переопределения порта, следует внести соответствующие изменения в файл `docker-compose.api.yml` 
+  - сервис доступен по адресу: [http://localhost:8080/api/v1](http://localhost:8080/api/openapi)
+  - документация к сервису по адресу: [http://localhost:8080/api/openapi](http://localhost:8080/api/openapi)
+  <br>Для переопределения порта, следует внести соответствующие изменения в файл `.env`  переменная `PROJECT_FEEDBACKS_API_PORT`
 
-## Тестирование сервиса.

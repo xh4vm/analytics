@@ -3,7 +3,6 @@
 from api.v1.params import FilmUserIDsParams
 from api.v1.utilitys import check_result
 from fastapi import APIRouter, Depends, Request
-from models.base import ResponseMDB
 from models.bookmarks import Bookmark
 from pydantic.types import UUID4
 from services.bookmark import BookmarkService, get_bookmark_service
@@ -12,7 +11,7 @@ router = APIRouter()
 
 
 @router.get(
-    '{film_id}',
+    '{user_id}',
     response_model=list[Bookmark],
     summary='Get list of user\'s bookmarks.',
     description='Get list of user\'s bookmarks.',
@@ -71,7 +70,7 @@ async def create_bookmark(
 
 @router.delete(
     '/bookmark',
-    response_model=ResponseMDB,
+    response_model=Bookmark,
     summary='Delete a user\'s bookmark.',
     description='Delete a user\'s bookmark.',
     response_description='Delete a user\'s bookmark.',
@@ -81,7 +80,7 @@ async def delete_bookmark(
         request: Request,
         params: FilmUserIDsParams = Depends(),
         obj_service: BookmarkService = Depends(get_bookmark_service),
-) -> ResponseMDB:
+) -> Bookmark:
     """ Delete a user\'s bookmark..
 
     Arguments:
@@ -90,7 +89,7 @@ async def delete_bookmark(
         obj_service: service object
 
     Returns:
-        ResponseMDB: respond
+        Bookmark: respond
     """
     result = await obj_service.delete_doc(params.get_dict())
     await check_result(result, obj_service.errors, obj_service.messages.list_empty)
