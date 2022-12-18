@@ -28,8 +28,47 @@ define log
 	@echo "${WHITE}----------------------------------------${RESET}"
 endef
 
+.PHONY: interactive build analytics services
+analytics: create-venv poetry-install-build-analytics build-dockers-analytics
+
+.PHONY: clean all docker images and pyc-files
+clean-all: clean-pyc clean-all-dockers
+
+.PHONY: run pre-commit all files
+pre-commit: create-venv pip-install-pre-commit pre-commit-files
+
+.PHONY: create venv
+create-venv:
+	$(call log,Create venv)
+	python3 -m venv venv
+
+.PHONY: install requirements-build to venv
+pip-install-build:
+	$(call log,Pip installing packages)
+	./venv/bin/pip3 install -r requirements-build.txt
+
+.PHONY: potery install build to venv
+poetry-install-build-analytics:
+	$(call log,Poetry installing packages)
+	poetry install --only build
+
+.PHONY: install requirements-pre-commit to venv
+pip-install-pre-commit:
+	$(call log,Pip installing packages)
+	./venv/bin/pip3 install -r requirements-pre-commit.txt
+
+.PHONY: potery install pre-commit to venv
+poetry-pre-commit-build:
+	$(call log,Poetry installing packages)
+	poetry install --only pre-commit
+
+.PHONY: interactive build docker analytics services 
+build-dockers-analytics:
+	$(call log,Build analytics containers)
+	docker-compose --profile analytics up --build
+
 .PHONY: run mongo containers
-mongo: create_net run_containers
+mongo: run_containers
 
 .PHONY: interactive build mongo cluster
 mongo_cfg: config_cluster
@@ -37,22 +76,22 @@ mongo_cfg: config_cluster
 .PHONY: run docker mongodb containers
 run_containers:
 	$(call log,Run containers)
-	sudo docker-compose --profile mongo up
+	docker-compose --profile mongo up
 
 .PHONY: configure the cluster
 config_cluster:
 	$(call log,Configure the cluster)
-	sudo docker exec -it mongocfg1 bash -c 'echo "rs.initiate({_id: \"mongors1conf\", configsvr: true, members: [{_id: 0, host: \"mongocfg1\"}, {_id: 1, host: \"mongocfg2\"}, {_id: 2, host: \"mongocfg3\"}]})" | mongosh'
-	sudo docker exec -it mongors1n1 bash -c 'echo "rs.initiate({_id: \"mongors1\", members: [{_id: 0, host: \"mongors1n1\"}, {_id: 1, host: \"mongors1n2\"}, {_id: 2, host: \"mongors1n3\"}]})" | mongosh'
-	sudo docker exec -it mongos1 bash -c 'echo "sh.addShard(\"mongors1/mongors1n1\")" | mongosh'
-	sudo docker exec -it mongors2n1 bash -c 'echo "rs.initiate({_id: \"mongors2\", members: [{_id: 0, host: \"mongors2n1\"}, {_id: 1, host: \"mongors2n2\"}, {_id: 2, host: \"mongors2n3\"}]})" | mongosh'
-	sudo docker exec -it mongos1 bash -c 'echo "sh.addShard(\"mongors2/mongors2n1\")" | mongosh'
+	docker exec -it mongocfg1 bash -c 'echo "rs.initiate({_id: \"mongors1conf\", configsvr: true, members: [{_id: 0, host: \"mongocfg1\"}, {_id: 1, host: \"mongocfg2\"}, {_id: 2, host: \"mongocfg3\"}]})" | mongosh'
+	docker exec -it mongors1n1 bash -c 'echo "rs.initiate({_id: \"mongors1\", members: [{_id: 0, host: \"mongors1n1\"}, {_id: 1, host: \"mongors1n2\"}, {_id: 2, host: \"mongors1n3\"}]})" | mongosh'
+	docker exec -it mongos1 bash -c 'echo "sh.addShard(\"mongors1/mongors1n1\")" | mongosh'
+	docker exec -it mongors2n1 bash -c 'echo "rs.initiate({_id: \"mongors2\", members: [{_id: 0, host: \"mongors2n1\"}, {_id: 1, host: \"mongors2n2\"}, {_id: 2, host: \"mongors2n3\"}]})" | mongosh'
+	docker exec -it mongos1 bash -c 'echo "sh.addShard(\"mongors2/mongors2n1\")" | mongosh'
 
 .PHONY: create database
 create_mongo_db:
 	$(call log,Create database)
-	sudo docker exec -it mongors1n1 bash -c 'echo "use movies" | mongosh'
-	sudo docker exec -it mongos1 bash -c 'echo "sh.enableSharding(\"movies\")" | mongosh'
+	docker exec -it mongors1n1 bash -c 'echo "use movies" | mongosh'
+	docker exec -it mongos1 bash -c 'echo "sh.enableSharding(\"movies\")" | mongosh'
 
 .PHONY: create and active venv
 build_venv: create-venv
@@ -85,16 +124,27 @@ test_data:
 	python db_research/mongo/src/benchmarks.py
 
 .PHONY: run feedbacks dev
-run_dev: create_net run_feedbacks_dev
-
-.PHONY: create network feedbacks dev docker containers
-create_net:
-	- sudo docker network create feedbacks_net
+run_dev: run_feedbacks_dev
 
 .PHONY: run feedbacks dev docker containers
 run_feedbacks_dev:
-	sudo docker-compose --profile feedbacks-dev up
+	docker-compose --profile feedbacks-dev up
 
 .PHONY: run feedbacks docker containers
 run_feedbacks:
-	sudo docker-compose --profile feedbacks up --build
+	docker-compose --profile feedbacks up --build
+
+.PHONY: run pre-commit all files
+pre-commit-files:
+	$(call log,Run pre commit functions)
+	source venv/bin/activate; ./venv/bin/pre-commit run --all-files
+
+.PHONY: clean-pyc
+clean-pyc:
+	$(call log,Run cleaning pyc and pyo files recursively)
+	find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
+
+.PHONY: clean all docker images
+clean-all-dockers:
+	$(call log,Run stop remove and cleaning memory)
+	T=$$(docker ps -q); docker stop $$T; docker rm $$T; docker container prune -f

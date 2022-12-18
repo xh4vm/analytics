@@ -4,9 +4,9 @@ from http import HTTPStatus
 import backoff
 from aiohttp.client_exceptions import ClientConnectorError
 from aioredis.exceptions import ConnectionError
-from core.config import SETTINGS
 from fastapi import HTTPException
 from pymongo.errors import ServerSelectionTimeoutError
+from src.core.config import SETTINGS
 
 
 async def check_result(result, errors: dict, messages):

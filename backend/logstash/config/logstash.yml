@@ -1,0 +1,4 @@
+http.host: "0.0.0.0"
+xpack.monitoring.elasticsearch.hosts: [ "${ES_PROTOCOL}://${ES_HOST}:${ES_PORT}" ]
+xpack.monitoring.elasticsearch.username: "${LOGSTASH_USER}"
+xpack.monitoring.elasticsearch.password: "${LOGSTASH_PASSWORD}"

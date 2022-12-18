@@ -1,14 +1,19 @@
 """ Router for Likes service. """
 
-from api.v1.params import FilmUserIDsParams, RatingParams
-from api.v1.utilitys import check_result
-from db.redis import use_cache
 from fastapi import APIRouter, Depends, Request
-from models.like import FilmsLikes
 from pydantic.types import UUID4
-from services.like import FilmsAvgRating, Like, LikeService, get_like_service
+from src.api.v1.params import FilmUserIDsParams, RatingParams
+from src.api.v1.utilitys import check_result
+from src.core.config import SETTINGS
+from src.db.redis import use_cache
+from src.models.like import FilmsLikes
+from src.modules.auth.src.payloads.fastapi import UserAccessRequired
+from src.services.like import (FilmsAvgRating, Like, LikeService,
+                               get_like_service)
 
 router = APIRouter()
+URL = f'{SETTINGS.FEEDBACKS_API_HOST}:{SETTINGS.FEEDBACKS_API_PORT}\
+{SETTINGS.FEEDBACKS_API_PATH}/{SETTINGS.FEEDBACKS_API_VERSION}/likes'
 
 
 @router.get(
@@ -23,6 +28,7 @@ router = APIRouter()
 async def get_number_films_likes(
         request: Request,
         film_id: UUID4,
+        current_user_id: str = Depends(UserAccessRequired(permissions={URL+'/count': 'GET'})),
         obj_service: LikeService = Depends(get_like_service),
 ) -> FilmsLikes:
     """ Number of likes and dislikes of films.
@@ -53,6 +59,7 @@ async def get_number_films_likes(
 async def get_films_avg_rating(
         request: Request,
         film_id: UUID4,
+        current_user_id: str = Depends(UserAccessRequired(permissions={URL+'/avg': 'GET'})),
         obj_service: LikeService = Depends(get_like_service),
 ) -> FilmsAvgRating:
     """ Average of rating of films.
@@ -83,6 +90,7 @@ async def create_like(
         request: Request,
         params: FilmUserIDsParams = Depends(),
         rating: RatingParams = Depends(),
+        current_user_id: str = Depends(UserAccessRequired(permissions={URL+'/like': 'POST'})),
         obj_service: LikeService = Depends(get_like_service),
 ) -> Like:
     """ Create like or dislike of films.
@@ -115,6 +123,7 @@ async def update_like(
         request: Request,
         params: FilmUserIDsParams = Depends(),
         rating: RatingParams = Depends(),
+        current_user_id: str = Depends(UserAccessRequired(permissions={URL+'/like': 'PUT'})),
         obj_service: LikeService = Depends(get_like_service),
 ) -> Like:
     """ 'Update user\'s like of films.'.
@@ -145,6 +154,7 @@ async def update_like(
 async def delete_like(
         request: Request,
         params: FilmUserIDsParams = Depends(),
+        current_user_id: str = Depends(UserAccessRequired(permissions={URL+'/like': 'DELETE'})),
         obj_service: LikeService = Depends(get_like_service),
 ) -> Like:
     """ 'Delete user\'s like of films.'.

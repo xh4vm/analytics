@@ -1,13 +1,17 @@
 """ Router for Films service. """
 
-from api.v1.params import FilmUserIDsParams
-from api.v1.utilitys import check_result
 from fastapi import APIRouter, Depends, Request
-from models.bookmarks import Bookmark
+from modules.auth.src.payloads.fastapi import UserAccessRequired
 from pydantic.types import UUID4
-from services.bookmark import BookmarkService, get_bookmark_service
+from src.api.v1.params import FilmUserIDsParams
+from src.api.v1.utilitys import check_result
+from src.core.config import SETTINGS
+from src.models.bookmarks import Bookmark
+from src.services.bookmark import BookmarkService, get_bookmark_service
 
 router = APIRouter()
+URL = f'{SETTINGS.FEEDBACKS_API_HOST}:{SETTINGS.FEEDBACKS_API_PORT}\
+{SETTINGS.FEEDBACKS_API_PATH}/{SETTINGS.FEEDBACKS_API_VERSION}/bookmarks'
 
 
 @router.get(
@@ -21,6 +25,7 @@ router = APIRouter()
 async def get_list_user_bookmarks(
         request: Request,
         user_id: UUID4,
+        current_user_id: str = Depends(UserAccessRequired(permissions={URL: 'GET'})),
         obj_service: BookmarkService = Depends(get_bookmark_service),
 ) -> [Bookmark]:
     """ Get list of user\'s bookmarks.
@@ -29,6 +34,7 @@ async def get_list_user_bookmarks(
         request: request
         user_id:
         obj_service: service object
+        current_user_id:
 
     Returns:
         list[Bookmark]: list of user\'s bookmarks.
@@ -50,6 +56,7 @@ async def get_list_user_bookmarks(
 async def create_bookmark(
         request: Request,
         params: FilmUserIDsParams = Depends(),
+        current_user_id: str = Depends(UserAccessRequired(permissions={URL: 'POST'})),
         obj_service: BookmarkService = Depends(get_bookmark_service),
 ) -> Bookmark:
     """ Create a user\'s bookmark.
@@ -79,6 +86,7 @@ async def create_bookmark(
 async def delete_bookmark(
         request: Request,
         params: FilmUserIDsParams = Depends(),
+        current_user_id: str = Depends(UserAccessRequired(permissions={URL+'/bookmark': 'DELETE'})),
         obj_service: BookmarkService = Depends(get_bookmark_service),
 ) -> Bookmark:
     """ Delete a user\'s bookmark..

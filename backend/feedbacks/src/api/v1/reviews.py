@@ -1,14 +1,18 @@
 """ Router for Reviews service. """
 
-from api.v1.params import (CustomQueryParams, CustomReviewsLikesParams,
-                           CustomReviewsParams, FilmUserIDsParams,
-                           RatingParams, ReviewUserIDsParams)
-from api.v1.utilitys import check_result
 from fastapi import APIRouter, Body, Depends, Request
-from models.review import ReviewAvgRating, ReviewDeleteLikes, ReviewLike
-from services.review import Review, ReviewService, get_review_service
+from modules.auth.src.payloads.fastapi import UserAccessRequired
+from src.api.v1.params import (CustomQueryParams, CustomReviewsLikesParams,
+                               CustomReviewsParams, FilmUserIDsParams,
+                               RatingParams, ReviewUserIDsParams)
+from src.api.v1.utilitys import check_result
+from src.core.config import SETTINGS
+from src.models.review import ReviewAvgRating, ReviewDeleteLikes, ReviewLike
+from src.services.review import Review, ReviewService, get_review_service
 
 router = APIRouter()
+URL = f'{SETTINGS.FEEDBACKS_API_HOST}:{SETTINGS.FEEDBACKS_API_PORT}\
+{SETTINGS.FEEDBACKS_API_PATH}/{SETTINGS.FEEDBACKS_API_VERSION}/likes'
 
 
 @router.get(
@@ -24,6 +28,7 @@ async def get_reviews_list(
         params: CustomQueryParams = Depends(),
         filters: CustomReviewsParams = Depends(),
         filters_likes: CustomReviewsLikesParams = Depends(),
+        current_user_id: str = Depends(UserAccessRequired(permissions={URL: 'GET'})),
         obj_service: ReviewService = Depends(get_review_service),
 ) -> [ReviewAvgRating]:
     """ Create a film review.
@@ -60,6 +65,7 @@ async def create_review(
         request: Request,
         params: FilmUserIDsParams = Depends(),
         text_review: str = Body(description='Text of film review', default='Text of film review.'),
+        current_user_id: str = Depends(UserAccessRequired(permissions={URL+'/review': 'POST'})),
         obj_service: ReviewService = Depends(get_review_service),
 ) -> Review:
     """ Create a film review.
@@ -91,6 +97,7 @@ async def update_review(
         request: Request,
         params: FilmUserIDsParams = Depends(),
         text_review: str = Body(description='Text of film review', default='Text of film review.'),
+        current_user_id: str = Depends(UserAccessRequired(permissions={URL+'/review': 'PUT'})),
         obj_service: ReviewService = Depends(get_review_service),
 ) -> Review:
     """ Update a film review.
@@ -121,6 +128,7 @@ async def update_review(
 async def delete_review(
         request: Request,
         params: FilmUserIDsParams = Depends(),
+        current_user_id: str = Depends(UserAccessRequired(permissions={URL+'/review': 'DELETE'})),
         obj_service: ReviewService = Depends(get_review_service),
 ) -> ReviewDeleteLikes:
     """ Delete a film review.
@@ -151,6 +159,7 @@ async def create_review_like(
         request: Request,
         params: ReviewUserIDsParams = Depends(),
         rating: RatingParams = Depends(),
+        current_user_id: str = Depends(UserAccessRequired(permissions={URL+'/review/like': 'POST'})),
         obj_service: ReviewService = Depends(get_review_service),
 ) -> Review:
     """ Create like or dislike of review.
