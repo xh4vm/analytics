@@ -20,7 +20,7 @@ class ElasticClient:
         settings: ElasticsearchSettings,
         username: Optional[str] = None,
         password: Optional[str] = None,
-        conn: Optional[Elasticsearch] = None
+        conn: Optional[Elasticsearch] = None,
     ) -> None:
         self._conn: Elasticsearch = conn
         self._username = username
@@ -36,17 +36,20 @@ class ElasticClient:
 
     @backoff.on_exception(**BACKOFF_CONFIG, logger=logger)
     def _reconnection(self) -> Elasticsearch:
-        logger.info('Reconnection elasticsearch...')
+        logger.info("Reconnection elasticsearch...")
 
         if self._conn is not None:
-            logger.info('Closing already exists es connector...')
+            logger.info("Closing already exists es connector...")
             self._conn.close()
 
         return Elasticsearch(
             [
-                f'{self._settings.PROTOCOL}://{self._settings.HOST}:{self._settings.PORT}'
+                f"{self._settings.PROTOCOL}://{self._settings.HOST}:{self._settings.PORT}"
             ],
-            http_auth=(self._username or self._settings.USER,  self._password or self._settings.PASSWORD)
+            http_auth=(
+                self._username or self._settings.USER,
+                self._password or self._settings.PASSWORD,
+            ),
         )
 
     @backoff.on_exception(**BACKOFF_CONFIG, logger=logger)

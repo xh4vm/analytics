@@ -13,7 +13,6 @@ backoff = "2.2.1"
 loguru = "0.6.0"
 faker = "^15.3.4"
 argparse = "^1.4.0"
-flake8 = ">=4.0.0"
 pre-commit = ">=2.19.0"
 motor = "3.1.1"
 
@@ -25,7 +24,7 @@ uvicorn = "0.18.3"
 uvloop = "0.17.0"
 pydantic-env = "0.2.0"
 python-dotenv = "0.21.0"
-unicorn = {extras = ["standart"], version = "2.0.0"}
+# unicorn = {extras = ["standart"], version = "2.0.0"}
 gunicorn = "20.1.0"
 backoff = "2.2.1"
 aiohttp = "3.8.3"
@@ -36,7 +35,11 @@ six="1.16.0"
 PyJWT="2.4.0"
 
 
-[tool.poetry.group.auth.dependencies]
+[tool.poetry.group.linters.dependencies]
+mypy = "^0.991"
+lxml = "^4.9.2"
+flake8-html = "^0.4.3"
+flake8 = "^6.0.0"
 
 [build-system]
 requires = ["poetry-core"]

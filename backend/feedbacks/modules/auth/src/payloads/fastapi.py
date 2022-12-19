@@ -11,18 +11,22 @@ class UserAccessRequired:
     def __init__(self, permissions: dict[str, list[str]]):
         self.permissions = permissions
 
-    def __call__(self, token: str = Header(alias=AUTH_CONFOG.APP.JWT_HEADER_NAME)) -> dict[str, Any]:
+    def __call__(
+        self, token: str = Header(alias=AUTH_CONFOG.APP.JWT_HEADER_NAME)
+    ) -> dict[str, Any]:
 
         if token is not None and isinstance(token, str):
             token_parts = token.split()
             token = token_parts[1] if len(token_parts) == 2 else None
-        
+
         access_service = AccessService()
 
         for url, method in self.permissions.items():
             response = access_service.is_accessible(token=token, method=method, url=url)
 
-            if not response.get('is_accessible'):
-                raise AccessException(status=HTTPStatus.FORBIDDEN, message=response.get('message'))
+            if not response.get("is_accessible"):
+                raise AccessException(
+                    status=HTTPStatus.FORBIDDEN, message=response.get("message")
+                )
 
-        return response['payload'].get('sub')
+        return response["payload"].get("sub")
