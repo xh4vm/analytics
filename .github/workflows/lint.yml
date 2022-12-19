@@ -1,9 +1,8 @@
 name: Lint workflow
 
 on:
-  #  pull_request:
-  push:
-    branches: [ ci-lint ]
+  pull_request:
+
 jobs:
   lint-flake8:
     name: Lint by flake8
