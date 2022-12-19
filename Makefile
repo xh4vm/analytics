@@ -148,3 +148,16 @@ clean-pyc:
 clean-all-dockers:
 	$(call log,Run stop remove and cleaning memory)
 	T=$$(docker ps -q); docker stop $$T; docker rm $$T; docker container prune -f
+
+.PHONY: run mypy with html-report
+lint-mypy:
+	@mypy -p backend -p db_research --html-report ./dist/reports/mypy
+
+.PHONY: run flake8 with html-report
+lint-flake8:
+	@flake8 --format=html --htmldir=./dist/reports/flake8
+
+.PHONY: run lint
+lint:
+	make lint-mypy -i
+	make lint-flake8 -i
