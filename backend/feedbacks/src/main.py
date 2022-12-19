@@ -4,15 +4,15 @@ import logging
 
 import aioredis
 import uvicorn as uvicorn
-from api.v1 import bookmarks, likes, reviews
-from core.config import SETTINGS
-from core.logger import LOGGING
-from db.mongodb.mongodb import mdb
-from db.redis import redis
-from fastapi import FastAPI
-# from fastapi import Request
-from fastapi.responses import ORJSONResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse, ORJSONResponse
+from modules.auth.src.exceptions.access import AccessException
 from motor.motor_asyncio import AsyncIOMotorClient
+from src.api.v1 import bookmarks, likes, reviews
+from src.core.config import SETTINGS
+from src.core.logger import LOGGING
+from src.db.mongodb.mongodb import mdb
+from src.db.redis import redis
 
 app = FastAPI(
     title=SETTINGS.NAME,
@@ -24,12 +24,14 @@ app = FastAPI(
 )
 
 
-# @app.middleware("http")
-# async def add_process_time_header(request: Request, call_next):
-#     request_id = request.headers.get('X-Request-Id')
-#     if not request_id:
-#         raise RuntimeError('request id is required')
-#     return await call_next(request)
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    if SETTINGS.FEEDBACKS_API_HOST == 'localhost':
+        return await call_next(request)
+    request_id = request.headers.get('X-Request-Id')
+    if not request_id:
+        raise RuntimeError('request id is required')
+    return await call_next(request)
 
 
 @app.on_event('startup')
@@ -46,6 +48,14 @@ async def shutdown():
     """ Execute close connects to databases on event shutdown. """
     await redis.cash.close()
     mdb.cl.close()
+
+
+@app.exception_handler(AccessException)
+def authjwt_exception_handler(request: Request, exc: AccessException):
+    return JSONResponse(
+        status_code=exc.status,
+        content={"detail": exc.message}
+    )
 
 
 app.include_router(likes.router, prefix='/api/v1/likes')

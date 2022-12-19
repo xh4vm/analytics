@@ -1,13 +1,13 @@
 from functools import lru_cache
 
 from bson import ObjectId
-from core.config import get_messages
-from core.settings import Messages
-from db.mongodb.mongodb import AsyncMongoDB, get_mongodb
-from db.redis import AsyncCacheStorage, get_redis
 from fastapi import Depends
-from models.review import Review
-from services.base import MongoDBService
+from src.core.config import get_messages
+from src.core.settings import Messages
+from src.db.mongodb.mongodb import AsyncMongoDB, get_mongodb
+from src.db.redis import AsyncCacheStorage, get_redis
+from src.models.review import Review
+from src.services.base import MongoDBService
 
 
 class ReviewService(MongoDBService):
@@ -87,6 +87,21 @@ class ReviewService(MongoDBService):
             skip={'$skip': kwargs['params'].skip},
         )
         return result
+
+    async def delete_review(self, params: dict, **kwargs):
+        current_model = kwargs.get('model') or self.model
+        deleted_review = await self.delete_doc(params)
+
+        if not deleted_review:
+            return None
+
+        result = await self.data_source.delete_many(
+            self.model.Config.collection_likes,
+            {'review_id': deleted_review['_id']}
+        )
+        deleted_likes_count = result.deleted_count if result.acknowledged else None
+
+        return current_model(**deleted_review, deleted_likes_count=deleted_likes_count)
 
 
 @lru_cache()

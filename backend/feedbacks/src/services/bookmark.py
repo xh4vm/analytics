@@ -1,12 +1,12 @@
 from functools import lru_cache
 
-from core.config import get_messages
-from core.settings import Messages
-from db.mongodb.mongodb import AsyncMongoDB, get_mongodb
-from db.redis import AsyncCacheStorage, get_redis
 from fastapi import Depends
-from models.bookmarks import Bookmark
-from services.base import MongoDBService
+from src.core.config import get_messages
+from src.core.settings import Messages
+from src.db.mongodb.mongodb import AsyncMongoDB, get_mongodb
+from src.db.redis import AsyncCacheStorage, get_redis
+from src.models.bookmarks import Bookmark
+from src.services.base import MongoDBService
 
 
 class BookmarkService(MongoDBService):

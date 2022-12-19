@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from pymongo import ReturnDocument
 from pymongo.errors import DuplicateKeyError
+from src.api.v1.utilitys import test_connection
 
 
 class AsyncDBStorage(ABC):
@@ -44,12 +45,13 @@ class AsyncMongoDB(AsyncDBStorage):
 
     def init_db(self, db_name):
         self.db = self.cl[db_name]
-        pass
 
+    @test_connection
     async def exec_command(self, db_name: str, command: dict, *args, **kwargs):
         res = await self.cl[db_name].command(command)
         return res
 
+    @test_connection
     async def aggregate(
             self,
             collection: str,
@@ -67,12 +69,14 @@ class AsyncMongoDB(AsyncDBStorage):
 
         return result
 
+    @test_connection
     async def insert_one(self, collection: str, data: dict,  *args, **kwargs):
         try:
             return None, await self.db.get_collection(collection).insert_one(data)
         except DuplicateKeyError as err:
             return err, None
 
+    @test_connection
     async def update_one(self, collection: str, find: dict, update: dict, *args, **kwargs):
         result = await self.db.get_collection(collection).find_one_and_update(
             find,
@@ -81,19 +85,28 @@ class AsyncMongoDB(AsyncDBStorage):
         )
         return result
 
+    @test_connection
     async def delete_one(self, collection: str, data: dict, *args, **kwargs):
-        result = await self.db.get_collection(collection).delete_one(data)
+        result = await self.db.get_collection(collection).find_one_and_delete(data)
         return result
 
+    @test_connection
+    async def delete_many(self, collection: str, data: dict, *args, **kwargs):
+        result = await self.db.get_collection(collection).delete_many(data)
+        return result
+
+    @test_connection
     async def find(self, collection: str, query: dict, options: dict = None, *args, **kwargs):
         options = options or {}
         cursor = self.db.get_collection(collection).find(query, {}, **options)
 
         return [doc async for doc in cursor]
 
+    @test_connection
     async def count(self, collection: str, query: dict, *args, **kwargs) -> int:
         return await self.db.get_collection(collection).count_documents(query)
 
+    @test_connection
     async def drop_collections(self):
         for collection in self.db.list_collection_names():
             self.db.drop_collection(collection)

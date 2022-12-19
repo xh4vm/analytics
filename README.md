@@ -10,6 +10,9 @@ cp .env.example .env
 # Подготовка файлов-логов nginx
 rm -rf ./backend/nginx/static && cp -r ./backend/nginx/static_defaults/ ./backend/nginx/static
 
+# Подготовка файлов-логов es-initer
+rm -rf ./backend/es_initer/static && cp -r ./backend/es_initer/static_defaults/ ./backend/es_initer/static
+
 # Запуск проекта
 make analytics
 ```

@@ -1,20 +1,23 @@
 """ Router for Reviews service. """
 
-from api.v1.params import (CustomQueryParams, CustomReviewsLikesParams,
-                           CustomReviewsParams, FilmUserIDsParams,
-                           RatingParams, ReviewUserIDsParams)
-from api.v1.utilitys import check_result
 from fastapi import APIRouter, Body, Depends, Request
-from models.base import ResponseMDB
-from models.review import ReviewFull, ReviewLike
-from services.review import Review, ReviewService, get_review_service
+from modules.auth.src.payloads.fastapi import UserAccessRequired
+from src.api.v1.params import (CustomQueryParams, CustomReviewsLikesParams,
+                               CustomReviewsParams, FilmUserIDsParams,
+                               RatingParams, ReviewUserIDsParams)
+from src.api.v1.utilitys import check_result
+from src.core.config import SETTINGS
+from src.models.review import ReviewAvgRating, ReviewDeleteLikes, ReviewLike
+from src.services.review import Review, ReviewService, get_review_service
 
 router = APIRouter()
+URL = f'{SETTINGS.FEEDBACKS_API_HOST}:{SETTINGS.FEEDBACKS_API_PORT}\
+{SETTINGS.FEEDBACKS_API_PATH}/{SETTINGS.FEEDBACKS_API_VERSION}/reviews'
 
 
 @router.get(
     '',
-    response_model=list[ReviewFull],
+    response_model=list[ReviewAvgRating],
     summary='Get list of films reviews.',
     description='Get list of films reviews.',
     response_description='Get list of films reviews.',
@@ -25,8 +28,9 @@ async def get_reviews_list(
         params: CustomQueryParams = Depends(),
         filters: CustomReviewsParams = Depends(),
         filters_likes: CustomReviewsLikesParams = Depends(),
+        current_user_id: str = Depends(UserAccessRequired(permissions={URL: 'GET'})),
         obj_service: ReviewService = Depends(get_review_service),
-) -> [ReviewFull]:
+) -> [ReviewAvgRating]:
     """ Create a film review.
 
     Arguments:
@@ -34,10 +38,11 @@ async def get_reviews_list(
         params:
         filters:
         filters_likes:
+        current_user_id
         obj_service: service object
 
     Returns:
-        list[ReviewFull]: user's list of film's review
+        list[ReviewAvgRating]: user's list of film's review
     """
     reviews = await obj_service.get_reviews_list(
         params=params,
@@ -61,6 +66,7 @@ async def create_review(
         request: Request,
         params: FilmUserIDsParams = Depends(),
         text_review: str = Body(description='Text of film review', default='Text of film review.'),
+        current_user_id: str = Depends(UserAccessRequired(permissions={URL+'/review': 'POST'})),
         obj_service: ReviewService = Depends(get_review_service),
 ) -> Review:
     """ Create a film review.
@@ -69,6 +75,7 @@ async def create_review(
         request: request
         params:
         text_review:
+        current_user_id:
         obj_service: service object
 
     Returns:
@@ -92,6 +99,7 @@ async def update_review(
         request: Request,
         params: FilmUserIDsParams = Depends(),
         text_review: str = Body(description='Text of film review', default='Text of film review.'),
+        current_user_id: str = Depends(UserAccessRequired(permissions={URL+'/review': 'PUT'})),
         obj_service: ReviewService = Depends(get_review_service),
 ) -> Review:
     """ Update a film review.
@@ -100,6 +108,7 @@ async def update_review(
         request: request
         params:
         text_review:
+        current_user_id:
         obj_service: service object
 
     Returns:
@@ -113,7 +122,7 @@ async def update_review(
 
 @router.delete(
     '/review',
-    response_model=ResponseMDB,
+    response_model=ReviewDeleteLikes,
     summary='Delete a film review.',
     description='Delete a film review.',
     response_description='Delete a film review.',
@@ -122,19 +131,21 @@ async def update_review(
 async def delete_review(
         request: Request,
         params: FilmUserIDsParams = Depends(),
+        current_user_id: str = Depends(UserAccessRequired(permissions={URL+'/review': 'DELETE'})),
         obj_service: ReviewService = Depends(get_review_service),
-) -> ResponseMDB:
+) -> ReviewDeleteLikes:
     """ Delete a film review.
 
     Arguments:
         request: request
         params:
+        current_user_id:
         obj_service: service object
 
     Returns:
-        ResponseMDB: respond
+        ReviewDeleteLikes: respond
     """
-    result = await obj_service.delete_doc(params.get_dict())
+    result = await obj_service.delete_review(params.get_dict(), model=ReviewDeleteLikes)
     await check_result(result, obj_service.errors, obj_service.messages.list_empty)
 
     return result
@@ -152,6 +163,7 @@ async def create_review_like(
         request: Request,
         params: ReviewUserIDsParams = Depends(),
         rating: RatingParams = Depends(),
+        current_user_id: str = Depends(UserAccessRequired(permissions={URL+'/review/like': 'POST'})),
         obj_service: ReviewService = Depends(get_review_service),
 ) -> Review:
     """ Create like or dislike of review.
@@ -160,6 +172,7 @@ async def create_review_like(
         request: request
         params:
         rating:
+        current_user_id:
         obj_service: service object
 
     Returns:

@@ -1,8 +1,8 @@
 from functools import lru_cache
 from logging import config as logging_config
 
-from core.logger import LOGGING
-from core.settings import Messages, Settings
+from src.core.logger import LOGGING
+from src.core.settings import Messages, Settings
 
 logging_config.dictConfig(LOGGING)
 
