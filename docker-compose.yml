@@ -9,8 +9,8 @@ x-redis: &base_redis
   image: redis:7.0-alpine
   container_name: redis
   restart: unless-stopped
-  ports:
-    - ${REDIS_PORT}:6379
+  expose:
+    - ${REDIS_PORT}
   healthcheck:
     test: ["CMD", "redis-cli","ping"]
     interval: 30s
@@ -38,24 +38,6 @@ x-base-logstash: &base_logstash
 
 services:
 
-  nginx-api:
-    <<: *base_service
-    image: nginx:1.23.1-alpine
-    container_name: nginx-api
-    profiles:
-      - feedbacks
-    volumes:
-      - ./backend/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./backend/nginx/configs/feedbacks.conf:/etc/nginx/conf.d/feedbacks.conf:ro
-      - ./backend/nginx/static/errors:/var/www/errors/:ro
-      - ./backend/nginx/static/log/access_log:/var/log/nginx/access.log:rw
-      - ./backend/nginx/static/log/error_log:/var/log/nginx/error.log:rw
-    depends_on:
-      feedbacks-api:
-        condition: service_healthy
-    ports:
-      - ${PROJECT_FEEDBACKS_API_PORT}:${PROJECT_FEEDBACKS_API_PORT}
-
   nginx:
     <<: *base_service
     image: nginx:1.23.1-alpine
@@ -63,8 +45,11 @@ services:
     env_file: .env
     profiles:
       - analytics
+      - feedbacks
     depends_on:
       kibana:
+        condition: service_healthy
+      feedbacks-api:
         condition: service_healthy
     volumes:
       - ./backend/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
@@ -74,6 +59,7 @@ services:
       - ./backend/nginx/static/log/error_log:/var/log/nginx/error.log:rw
     ports:
       - ${KIBANA_PORT}:${KIBANA_PORT}
+      - ${PROJECT_FEEDBACKS_API_PORT}:${PROJECT_FEEDBACKS_API_PORT}
 
   redis:
     <<: *base_redis
@@ -105,7 +91,7 @@ services:
       memlock:
         soft: -1
         hard: -1
-#    mem_limit: 2g
+    mem_limit: 2g
     healthcheck:
       test: curl ${ES_PROTOCOL}://${ES_USER}:${ES_PASSWORD}@${ES_HOST}:${ES_PORT} >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
       interval: 30s
@@ -133,7 +119,7 @@ services:
     depends_on: 
       elasticsearch: 
         condition: service_healthy
-#    mem_limit: 2g
+    mem_limit: 2g
     profiles:
       - analytics
     volumes:
@@ -175,6 +161,8 @@ services:
       - ./backend/nginx/static/log/access_log:/var/log/nginx/access.log
       - ./backend/nginx/static/log/error_log:/var/log/nginx/error.log
       - ./backend/es_initer/static/log.txt:/var/log/elasticsearch-initer/log.txt
+      - ./backend/feedbacks/static/info.log:/var/log/feedbacks/info.log
+      - ./backend/feedbacks/static/error.log:/var/log/feedbacks/error.log
     profiles: 
       - analytics
     depends_on:
@@ -357,6 +345,8 @@ services:
       - ${PROJECT_FEEDBACKS_API_PORT}
     volumes:
       - ./backend/feedbacks:/opt/content
+      - ./backend/feedbacks/static/info.log:/var/log/feedbacks/info.log
+      - ./backend/feedbacks/static/error.log:/var/log/feedbacks/error.log
     healthcheck:
       test: curl http://feedbacks-api:${PROJECT_FEEDBACKS_API_PORT} >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
       interval: 3s

@@ -15,6 +15,9 @@ rm -rf ./backend/nginx/static && cp -r ./backend/nginx/static_defaults/ ./backen
 # Подготовка файлов-логов es-initer
 rm -rf ./backend/es_initer/static && cp -r ./backend/es_initer/static_defaults/ ./backend/es_initer/static
 
+# Подготовка файлов-логов feedbacks
+rm -rf ./backend/feedbacks/static && cp -r ./backend/feedbacks/static_defaults/ ./backend/feedbacks/static
+
 # Запуск проекта
 make analytics
 ```
