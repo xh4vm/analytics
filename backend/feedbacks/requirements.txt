@@ -2,7 +2,6 @@ backoff==2.1.2
 aiohttp==3.8.1
 aioredis==2.0.1
 async-timeout==4.0.2
-confluent_kafka==1.8.2
 dependency_injector==4.39.1
 fastapi==0.79.0
 fastavro==1.7.0
