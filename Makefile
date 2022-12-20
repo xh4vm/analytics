@@ -71,7 +71,7 @@ build-dockers-analytics:
 mongo: run_containers
 
 .PHONY: interactive build mongo cluster
-mongo_cfg: config_cluster
+mongo_cfg: config_cluster create_feedbacks_coll
 
 .PHONY: run docker containers
 run_containers:
@@ -83,8 +83,16 @@ config_cluster:
 	$(call log,Configure the cluster)
 	docker exec -it mongocfg1 bash -c 'echo "rs.initiate({_id: \"mongors1conf\", configsvr: true, members: [{_id: 0, host: \"mongocfg1\"}, {_id: 1, host: \"mongocfg2\"}, {_id: 2, host: \"mongocfg3\"}]})" | mongosh'
 	docker exec -it mongors1n1 bash -c 'echo "rs.initiate({_id: \"mongors1\", members: [{_id: 0, host: \"mongors1n1\"}, {_id: 1, host: \"mongors1n2\"}, {_id: 2, host: \"mongors1n3\"}]})" | mongosh'
+<<<<<<< Updated upstream
+=======
+	sleep 10
+>>>>>>> Stashed changes
 	docker exec -it mongos1 bash -c 'echo "sh.addShard(\"mongors1/mongors1n1\")" | mongosh'
 	docker exec -it mongors2n1 bash -c 'echo "rs.initiate({_id: \"mongors2\", members: [{_id: 0, host: \"mongors2n1\"}, {_id: 1, host: \"mongors2n2\"}, {_id: 2, host: \"mongors2n3\"}]})" | mongosh'
+<<<<<<< Updated upstream
+=======
+	sleep 10
+>>>>>>> Stashed changes
 	docker exec -it mongos1 bash -c 'echo "sh.addShard(\"mongors2/mongors2n1\")" | mongosh'
 
 .PHONY: create database
@@ -99,7 +107,7 @@ build_venv: create-venv
 	python3 -m venv venv
 	$(call log,Poetry installing packages)
 	poetry install
-	$(call log,Poetry activate
+	$(call log,Poetry activate)
 	poetry shell
 
 .PHONY: create collections without index
@@ -109,6 +117,13 @@ create_coll:
 .PHONY: create collections
 drop_coll:
 	python db_research/mongo/src/create_collections.py -d
+
+.PHONY: create feedbacks collections with index
+create_feedbacks_coll:
+	$(call log,Create collections)
+	export PYTHONPATH=backend/feedbacks
+	poetry run python backend/feedbacks/src/db/mongodb/create_collections.py
+	poetry run python backend/feedbacks/src/db/mongodb/create_collections.py -i
 
 .PHONY: create collections with index
 create_coll_i:
