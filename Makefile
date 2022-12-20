@@ -73,7 +73,7 @@ mongo: run_containers
 .PHONY: interactive build mongo cluster
 mongo_cfg: config_cluster create_feedbacks_coll
 
-.PHONY: run docker containers
+.PHONY: run docker mongodb containers
 run_containers:
 	$(call log,Run containers)
 	docker-compose --profile mongo up
@@ -82,17 +82,13 @@ run_containers:
 config_cluster:
 	$(call log,Configure the cluster)
 	docker exec -it mongocfg1 bash -c 'echo "rs.initiate({_id: \"mongors1conf\", configsvr: true, members: [{_id: 0, host: \"mongocfg1\"}, {_id: 1, host: \"mongocfg2\"}, {_id: 2, host: \"mongocfg3\"}]})" | mongosh'
+	sleep 2
 	docker exec -it mongors1n1 bash -c 'echo "rs.initiate({_id: \"mongors1\", members: [{_id: 0, host: \"mongors1n1\"}, {_id: 1, host: \"mongors1n2\"}, {_id: 2, host: \"mongors1n3\"}]})" | mongosh'
-<<<<<<< Updated upstream
-=======
 	sleep 10
->>>>>>> Stashed changes
 	docker exec -it mongos1 bash -c 'echo "sh.addShard(\"mongors1/mongors1n1\")" | mongosh'
+	sleep 2
 	docker exec -it mongors2n1 bash -c 'echo "rs.initiate({_id: \"mongors2\", members: [{_id: 0, host: \"mongors2n1\"}, {_id: 1, host: \"mongors2n2\"}, {_id: 2, host: \"mongors2n3\"}]})" | mongosh'
-<<<<<<< Updated upstream
-=======
 	sleep 10
->>>>>>> Stashed changes
 	docker exec -it mongos1 bash -c 'echo "sh.addShard(\"mongors2/mongors2n1\")" | mongosh'
 
 .PHONY: create database
@@ -138,6 +134,17 @@ load_data:
 test_data:
 	python db_research/mongo/src/benchmarks.py
 
+.PHONY: run feedbacks dev
+run_dev: run_feedbacks_dev
+
+.PHONY: run feedbacks dev docker containers
+run_feedbacks_dev:
+	docker-compose --profile feedbacks-dev up
+
+.PHONY: run feedbacks docker containers
+run_feedbacks:
+	docker-compose --profile feedbacks up --build
+
 .PHONY: run pre-commit all files
 pre-commit-files:
 	$(call log,Run pre commit functions)
@@ -152,3 +159,16 @@ clean-pyc:
 clean-all-dockers:
 	$(call log,Run stop remove and cleaning memory)
 	T=$$(docker ps -q); docker stop $$T; docker rm $$T; docker container prune -f
+
+.PHONY: run mypy with html-report
+lint-mypy:
+	@mypy -p backend -p db_research --html-report ./dist/reports/mypy
+
+.PHONY: run flake8 with html-report
+lint-flake8:
+	@flake8 --format=html --htmldir=./dist/reports/flake8
+
+.PHONY: run lint
+lint:
+	make lint-mypy -i
+	make lint-flake8 -i

@@ -13,9 +13,33 @@ backoff = "2.2.1"
 loguru = "0.6.0"
 faker = "^15.3.4"
 argparse = "^1.4.0"
-flake8 = ">=4.0.0"
 pre-commit = ">=2.19.0"
+motor = "3.1.1"
 
+[tool.poetry.group.build.dependencies]
+aioredis = "2.0.1"
+fastapi = "0.85.0"
+orjson = "3.8.0"
+uvicorn = "0.18.3"
+uvloop = "0.17.0"
+pydantic-env = "0.2.0"
+python-dotenv = "0.21.0"
+# unicorn = {extras = ["standart"], version = "2.0.0"}
+gunicorn = "20.1.0"
+backoff = "2.2.1"
+aiohttp = "3.8.3"
+grpcio="1.47.0"
+grpcio-tools="1.47.0"
+protobuf="3.20.1"
+six="1.16.0"
+PyJWT="2.4.0"
+
+
+[tool.poetry.group.linters.dependencies]
+mypy = "^0.991"
+lxml = "^4.9.2"
+flake8-html = "^0.4.3"
+flake8 = "^6.0.0"
 
 [build-system]
 requires = ["poetry-core"]

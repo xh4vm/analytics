@@ -21,6 +21,21 @@ filebeat.inputs:
     fields:
       application: "elastic"
       pid: "initer"
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/feedbacks/info.log
+    fields:
+      application: "feedbacks"
+      pid: "info"
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/feedbacks/error.log
+    fields:
+      application: "feedbacks"
+      pid: "error"
+
 
 output.logstash:
   enabled: true

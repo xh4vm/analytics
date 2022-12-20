@@ -1,4 +1,5 @@
 **/clickhouse/fake_data/*.csv
+.idea
 
 # Byte-compiled / optimized / DLL files
 *__pycache__
@@ -146,3 +147,5 @@ backend/auth/api/migrations
 /.venv/
 .idea/
 *__pycache__
+.env
+/backend/feedbacks/.dockerignore

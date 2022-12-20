@@ -1,7 +1,7 @@
 from typing import Any
 
 import backoff
-from pydantic import BaseSettings, Field
+from pydantic import BaseSettings
 
 
 class ElasticsearchSettings(BaseSettings):
@@ -12,7 +12,7 @@ class ElasticsearchSettings(BaseSettings):
     PORT: int
 
     class Config:
-        env_prefix = 'ES_'
+        env_prefix = "ES_"
 
 
 class BaseSecuritySettings(BaseSettings):
@@ -22,32 +22,42 @@ class BaseSecuritySettings(BaseSettings):
 
 class SecurityDefaultElasticsearchSettings(BaseSecuritySettings):
     class Config:
-        env_prefix = 'SECURITY_DEFAULT_ES_'
+        env_prefix = "SECURITY_DEFAULT_ES_"
 
 
 class SecurityElasticsearchSettings(BaseSecuritySettings):
     class Config:
-        env_prefix = 'ES_'
+        env_prefix = "ES_"
 
 
 class SecurityLogstashSettings(BaseSecuritySettings):
     class Config:
-        env_prefix = 'LOGSTASH_'
+        env_prefix = "LOGSTASH_"
 
 
 class SecurityKibanaSettings(BaseSecuritySettings):
     class Config:
-        env_prefix = 'KIBANA_'
+        env_prefix = "KIBANA_"
 
 
 ELASTIC_CONFIG: ElasticsearchSettings = ElasticsearchSettings()
 
-SECURITY_DEFAULT_ELASTIC_CONFIG: SecurityDefaultElasticsearchSettings = SecurityDefaultElasticsearchSettings()
+SECURITY_DEFAULT_ELASTIC_CONFIG: SecurityDefaultElasticsearchSettings = (
+    SecurityDefaultElasticsearchSettings()
+)
 
 SECURITY_ELASTIC_CONFIG: SecurityElasticsearchSettings = SecurityElasticsearchSettings()
 SECURITY_KIBANA_CONFIG: SecurityKibanaSettings = SecurityKibanaSettings()
 SECURITY_LOGSTASH_CONFIG: SecurityLogstashSettings = SecurityLogstashSettings()
 
-SECURITY_CONFIG: list[BaseSecuritySettings] = [SECURITY_ELASTIC_CONFIG, SECURITY_KIBANA_CONFIG, SECURITY_LOGSTASH_CONFIG]
+SECURITY_CONFIG: list[BaseSecuritySettings] = [
+    SECURITY_ELASTIC_CONFIG,
+    SECURITY_KIBANA_CONFIG,
+    SECURITY_LOGSTASH_CONFIG,
+]
 
-BACKOFF_CONFIG: dict[str, Any] = {'wait_gen': backoff.expo, 'exception': Exception, 'max_value': 8}
+BACKOFF_CONFIG: dict[str, Any] = {
+    "wait_gen": backoff.expo,
+    "exception": Exception,
+    "max_value": 8,
+}

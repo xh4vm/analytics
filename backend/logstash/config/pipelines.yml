@@ -2,9 +2,17 @@
   pipeline.workers: 4
   pipeline.batch.size: 250
   config.string: |
-    input { beats { port => 5044 } }
-    output { pipeline { send_to => [logs_nginx, logs_es_initer] } }
+    input {
+      beats { port => 5044 }
+    }
+    output {
+      pipeline {
+        send_to => [logs_nginx, logs_es_initer, logs_feedbacks]
+      }
+    }
 - pipeline.id: "LOGS-NGINX"
-  path.config: "./config/pipelines/nginx_pipeline.conf"
+  path.config: "./config/pipelines/nginx.conf"
 - pipeline.id: "LOGS-ES-INITER"
   path.config: "./config/pipelines/es_initer.conf"
+- pipeline.id: "LOGS-FEEDBACKS"
+  path.config: "./config/pipelines/feedbacks.conf"
