@@ -19,7 +19,7 @@ x-redis: &base_redis
 
 x-base-logstash: &base_logstash
   <<: *base_service
-  build: backend/logstash
+  build: log_hub/logstash
   container_name: logstash
   depends_on: 
     elasticsearch: 
@@ -30,9 +30,9 @@ x-base-logstash: &base_logstash
     - LOGSTASH_JDBC_PASSWORD=${LOGSTASH_PASSWORD}
     - LOGSTASH_ELASTICSEARCH_HOST=${ES_PROTOCOL}://${LOGSTASH_USER}:${LOGSTASH_PASSWORD}@${ES_HOST}:${ES_PORT}
   volumes:
-      - ./backend/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
-      - ./backend/logstash/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro
-      - ./backend/logstash/config//pipelines/:/usr/share/logstash/config/pipelines/:ro
+      - ./log_hub/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./log_hub/logstash/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro
+      - ./log_hub/logstash/config//pipelines/:/usr/share/logstash/config/pipelines/:ro
   expose:
     - ${LOGSTASH_PORT}
 
@@ -52,11 +52,11 @@ services:
       feedbacks-api:
         condition: service_healthy
     volumes:
-      - ./backend/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./backend/nginx/configs:/etc/nginx/conf.d:ro
-      - ./backend/nginx/static/errors:/var/www/errors/:ro
-      - ./backend/nginx/static/log/access_log:/var/log/nginx/access.log:rw
-      - ./backend/nginx/static/log/error_log:/var/log/nginx/error.log:rw
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/configs:/etc/nginx/conf.d:ro
+      - ./nginx/static/errors:/var/www/errors/:ro
+      - ./nginx/static/log/access_log:/var/log/nginx/access.log:rw
+      - ./nginx/static/log/error_log:/var/log/nginx/error.log:rw
     ports:
       - ${KIBANA_PORT}:${KIBANA_PORT}
       - ${PROJECT_FEEDBACKS_API_PORT}:${PROJECT_FEEDBACKS_API_PORT}
@@ -100,7 +100,7 @@ services:
 
   es-initer:
     <<: *base_service
-    build: ./backend/es_initer
+    build: ./log_hub/es_initer
     container_name: es-initer
     env_file: .env
     profiles: 
@@ -109,7 +109,7 @@ services:
       elasticsearch:
         condition: service_healthy
     volumes:
-      - ./backend/es_initer/static/log.txt:/var/log/elasticsearch-initer/log.txt
+      - ./log_hub/es_initer/static/log.txt:/var/log/elasticsearch-initer/log.txt
 
   kibana:
     <<: *base_service
@@ -123,7 +123,7 @@ services:
     profiles:
       - analytics
     volumes:
-      - ./backend/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+      - ./log_hub/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
     environment:
       - ELASTICSEARCH_HOSTS=${ES_PROTOCOL}://${KIBANA_USER}:${KIBANA_PASSWORD}@${ES_HOST}:${ES_PORT}
       - ELASTICSEARCH_USERNAME=${KIBANA_USER}
@@ -157,10 +157,10 @@ services:
     env_file: .env
     entrypoint: "filebeat -e -strict.perms=false"
     volumes:
-      - ./backend/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - ./backend/nginx/static/log/access_log:/var/log/nginx/access.log
-      - ./backend/nginx/static/log/error_log:/var/log/nginx/error.log
-      - ./backend/es_initer/static/log.txt:/var/log/elasticsearch-initer/log.txt
+      - ./log_hub/filebeat/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - ./nginx/static/log/access_log:/var/log/nginx/access.log
+      - ./nginx/static/log/error_log:/var/log/nginx/error.log
+      - ./log_hub/es_initer/static/log.txt:/var/log/elasticsearch-initer/log.txt
       - ./backend/feedbacks/static/info.log:/var/log/feedbacks/info.log
       - ./backend/feedbacks/static/error.log:/var/log/feedbacks/error.log
     profiles: 
