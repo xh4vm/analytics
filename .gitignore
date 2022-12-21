@@ -148,4 +148,4 @@ backend/auth/api/migrations
 .idea/
 *__pycache__
 .env
-/backend/feedbacks/.dockerignore
+./backend/feedbacks/.dockerignore
